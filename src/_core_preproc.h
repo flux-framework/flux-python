@@ -1,10 +1,10 @@
-# 1 "/workspaces/python/src/_core_clean.h"
+# 1 "/workspaces/flux-python/src/_core_clean.h"
 # 1 "<built-in>"
 # 1 "<command-line>"
 # 1 "/usr/include/stdc-predef.h" 1 3 4
 # 1 "<command-line>" 2
-# 1 "/workspaces/python/src/_core_clean.h"
-# 47 "/workspaces/python/src/_core_clean.h"
+# 1 "/workspaces/flux-python/src/_core_clean.h"
+# 47 "/workspaces/flux-python/src/_core_clean.h"
 typedef void (*flux_free_f)(void *arg);
 
 
@@ -13,7 +13,7 @@ typedef void (*flux_free_f)(void *arg);
 typedef struct {
     char text[160];
 } flux_error_t;
-# 97 "/workspaces/python/src/_core_clean.h"
+# 97 "/workspaces/flux-python/src/_core_clean.h"
 typedef struct flux_msg flux_msg_t;
 
 enum {
@@ -60,7 +60,7 @@ void flux_match_free (struct flux_match m);
 int flux_match_asprintf (struct flux_match *m,
                          const char *topic_glob_fmt,
                          ...);
-# 171 "/workspaces/python/src/_core_clean.h"
+# 171 "/workspaces/flux-python/src/_core_clean.h"
 flux_msg_t *flux_msg_create (int type);
 void flux_msg_destroy (flux_msg_t *msg);
 
@@ -169,7 +169,7 @@ int flux_msg_vpack (flux_msg_t *msg, const char *fmt, va_list ap);
 
 int flux_msg_unpack (const flux_msg_t *msg, const char *fmt, ...);
 int flux_msg_vunpack (const flux_msg_t *msg, const char *fmt, va_list ap);
-# 287 "/workspaces/python/src/_core_clean.h"
+# 287 "/workspaces/flux-python/src/_core_clean.h"
 const char *flux_msg_last_error (const flux_msg_t *msg);
 
 
@@ -255,7 +255,7 @@ void flux_msg_fprint_ts (FILE *f, const flux_msg_t *msg, double timestamp);
 
 
 const char *flux_msg_typestr (int type);
-# 382 "/workspaces/python/src/_core_clean.h"
+# 382 "/workspaces/flux-python/src/_core_clean.h"
 void flux_msg_route_enable (flux_msg_t *msg);
 
 
@@ -314,7 +314,7 @@ char *flux_msg_route_string (const flux_msg_t *msg);
 
 bool flux_msg_route_match_first (const flux_msg_t *msg1,
                                  const flux_msg_t *msg2);
-# 456 "/workspaces/python/src/_core_clean.h"
+# 456 "/workspaces/flux-python/src/_core_clean.h"
 typedef struct flux_handle_struct flux_t;
 
 typedef struct {
@@ -355,7 +355,7 @@ enum {
     FLUX_POLLOUT = 2,
     FLUX_POLLERR = 4,
 };
-# 509 "/workspaces/python/src/_core_clean.h"
+# 509 "/workspaces/flux-python/src/_core_clean.h"
 flux_t *flux_open (const char *uri, int flags);
 
 
@@ -391,7 +391,7 @@ int flux_opt_get (flux_t *h, const char *option, void *val, size_t len);
 
 
 void flux_comms_error_set (flux_t *h, flux_comms_error_f fun, void *arg);
-# 553 "/workspaces/python/src/_core_clean.h"
+# 553 "/workspaces/flux-python/src/_core_clean.h"
 void *flux_aux_get (flux_t *h, const char *name);
 int flux_aux_set (flux_t *h, const char *name, void *aux, flux_free_f destroy);
 
@@ -413,7 +413,7 @@ uint32_t flux_matchtag_avail (flux_t *h);
 
 
 int flux_send (flux_t *h, const flux_msg_t *msg, int flags);
-# 582 "/workspaces/python/src/_core_clean.h"
+# 582 "/workspaces/flux-python/src/_core_clean.h"
 flux_msg_t *flux_recv (flux_t *h, struct flux_match match, int flags);
 
 
@@ -428,14 +428,14 @@ int flux_requeue (flux_t *h, const flux_msg_t *msg, int flags);
 
 
 int flux_pollevents (flux_t *h);
-# 606 "/workspaces/python/src/_core_clean.h"
+# 606 "/workspaces/flux-python/src/_core_clean.h"
 int flux_pollfd (flux_t *h);
 
 
 
 void flux_get_msgcounters (flux_t *h, flux_msgcounters_t *mcs);
 void flux_clr_msgcounters (flux_t *h);
-# 654 "/workspaces/python/src/_core_clean.h"
+# 654 "/workspaces/flux-python/src/_core_clean.h"
 typedef struct flux_buffer flux_buffer_t;
 
 
@@ -452,7 +452,7 @@ int flux_buffer_bytes (flux_buffer_t *fb);
 
 
 int flux_buffer_space (flux_buffer_t *fb);
-# 680 "/workspaces/python/src/_core_clean.h"
+# 680 "/workspaces/flux-python/src/_core_clean.h"
 int flux_buffer_readonly (flux_buffer_t *fb);
 bool flux_buffer_is_readonly (flux_buffer_t *fb);
 
@@ -460,9 +460,9 @@ bool flux_buffer_is_readonly (flux_buffer_t *fb);
 
 
 int flux_buffer_drop (flux_buffer_t *fb, int len);
-# 695 "/workspaces/python/src/_core_clean.h"
+# 695 "/workspaces/flux-python/src/_core_clean.h"
 const void *flux_buffer_peek (flux_buffer_t *fb, int len, int *lenp);
-# 705 "/workspaces/python/src/_core_clean.h"
+# 705 "/workspaces/flux-python/src/_core_clean.h"
 const void *flux_buffer_read (flux_buffer_t *fb, int len, int *lenp);
 
 
@@ -523,7 +523,7 @@ int flux_buffer_read_to_fd (flux_buffer_t *fb, int fd, int len);
 
 
 int flux_buffer_write_from_fd (flux_buffer_t *fb, int fd, int len);
-# 781 "/workspaces/python/src/_core_clean.h"
+# 781 "/workspaces/flux-python/src/_core_clean.h"
 typedef struct flux_reactor flux_reactor_t;
 
 
@@ -609,18 +609,12 @@ flux_watcher_t *flux_buffer_read_watcher_create (flux_reactor_t *r, int fd,
 flux_buffer_t *flux_buffer_read_watcher_get_buffer (flux_watcher_t *w);
 
 
-
-
-const char *flux_buffer_read_watcher_get_data (flux_watcher_t *w,
-                                               int *lenp);
-
-
 flux_watcher_t *flux_buffer_write_watcher_create (flux_reactor_t *r, int fd,
                                                   int size, flux_watcher_f cb,
                                                   int flags, void *arg);
 
 flux_buffer_t *flux_buffer_write_watcher_get_buffer (flux_watcher_t *w);
-# 887 "/workspaces/python/src/_core_clean.h"
+# 881 "/workspaces/flux-python/src/_core_clean.h"
 int flux_buffer_write_watcher_close (flux_watcher_t *w);
 
 
@@ -698,7 +692,7 @@ struct flux_watcher_ops {
     void (*stop) (flux_watcher_t *w);
     void (*destroy) (flux_watcher_t *w);
 };
-# 972 "/workspaces/python/src/_core_clean.h"
+# 966 "/workspaces/flux-python/src/_core_clean.h"
 flux_watcher_t * flux_watcher_create (flux_reactor_t *r, size_t data_size,
                                       struct flux_watcher_ops *ops,
                                       flux_watcher_f fn, void *arg);
@@ -710,7 +704,7 @@ void * flux_watcher_get_data (flux_watcher_t *w);
 
 
 struct flux_watcher_ops * flux_watcher_get_ops (flux_watcher_t *w);
-# 1011 "/workspaces/python/src/_core_clean.h"
+# 1005 "/workspaces/flux-python/src/_core_clean.h"
 typedef struct flux_msg_handler flux_msg_handler_t;
 
 typedef void (*flux_msg_handler_f)(flux_t *h, flux_msg_handler_t *mh,
@@ -751,7 +745,7 @@ void flux_msg_handler_delvec (flux_msg_handler_t *msg_handlers[]);
 
 
 int flux_dispatch_requeue (flux_t *h);
-# 1082 "/workspaces/python/src/_core_clean.h"
+# 1076 "/workspaces/flux-python/src/_core_clean.h"
 typedef flux_t *(connector_init_f)(const char *uri,
                                    int flags,
                                    flux_error_t *errp);
@@ -772,7 +766,7 @@ struct flux_handle_ops {
 
 flux_t *flux_handle_create (void *impl, const struct flux_handle_ops *ops, int flags);
 void flux_handle_destroy (flux_t *hp);
-# 1133 "/workspaces/python/src/_core_clean.h"
+# 1127 "/workspaces/flux-python/src/_core_clean.h"
 struct flux_msglist *flux_msglist_create (void);
 void flux_msglist_destroy (struct flux_msglist *l);
 
@@ -786,10 +780,10 @@ const flux_msg_t *flux_msglist_next (struct flux_msglist *l);
 const flux_msg_t *flux_msglist_last (struct flux_msglist *l);
 
 int flux_msglist_count (struct flux_msglist *l);
-# 1154 "/workspaces/python/src/_core_clean.h"
+# 1148 "/workspaces/flux-python/src/_core_clean.h"
 int flux_msglist_pollevents (struct flux_msglist *l);
 int flux_msglist_pollfd (struct flux_msglist *l);
-# 1190 "/workspaces/python/src/_core_clean.h"
+# 1184 "/workspaces/flux-python/src/_core_clean.h"
 int flux_request_decode (const flux_msg_t *msg, const char **topic,
                          const char **s);
 
@@ -820,10 +814,10 @@ flux_msg_t *flux_request_encode (const char *topic, const char *s);
 
 flux_msg_t *flux_request_encode_raw (const char *topic,
                                      const void *data, int len);
-# 1256 "/workspaces/python/src/_core_clean.h"
+# 1250 "/workspaces/flux-python/src/_core_clean.h"
 int flux_response_decode (const flux_msg_t *msg, const char **topic,
                           const char **s);
-# 1267 "/workspaces/python/src/_core_clean.h"
+# 1261 "/workspaces/flux-python/src/_core_clean.h"
 int flux_response_decode_raw (const flux_msg_t *msg, const char **topic,
                               const void **data, int *len);
 
@@ -878,11 +872,11 @@ int flux_respond_raw (flux_t *h, const flux_msg_t *request,
 
 int flux_respond_error (flux_t *h, const flux_msg_t *request,
                         int errnum, const char *errstr);
-# 1349 "/workspaces/python/src/_core_clean.h"
+# 1343 "/workspaces/flux-python/src/_core_clean.h"
 flux_msg_t *flux_control_encode (int type, int status);
 
 int flux_control_decode (const flux_msg_t *msg, int *type, int *status);
-# 1410 "/workspaces/python/src/_core_clean.h"
+# 1404 "/workspaces/flux-python/src/_core_clean.h"
 typedef void (*flux_log_f)(const char *buf, int len, void *arg);
 
 
@@ -923,18 +917,7 @@ void flux_log_set_redirect (flux_t *h, flux_log_f fun, void *arg);
 
 
 const char *flux_strerror (int errnum);
-
-
-
-void flux_llog (void *arg,
-                const char *file,
-                int line,
-                const char *func,
-                const char *subsys,
-                int level,
-                const char *fmt,
-                va_list ap);
-# 1480 "/workspaces/python/src/_core_clean.h"
+# 1463 "/workspaces/flux-python/src/_core_clean.h"
 typedef struct flux_future flux_future_t;
 
 typedef void (*flux_continuation_f)(flux_future_t *f, void *arg);
@@ -1000,7 +983,7 @@ const char * flux_future_first_child (flux_future_t *cf);
 const char * flux_future_next_child (flux_future_t *cf);
 
 flux_future_t *flux_future_get_child (flux_future_t *cf, const char *name);
-# 1558 "/workspaces/python/src/_core_clean.h"
+# 1541 "/workspaces/flux-python/src/_core_clean.h"
 flux_future_t *flux_future_and_then (flux_future_t *f,
                                      flux_continuation_f cb, void *arg);
 
@@ -1028,7 +1011,7 @@ void flux_future_continue_error (flux_future_t *prev, int errnum,
 int flux_future_fulfill_next (flux_future_t *prev,
                               void *result,
                               flux_free_f free_fn);
-# 1600 "/workspaces/python/src/_core_clean.h"
+# 1583 "/workspaces/flux-python/src/_core_clean.h"
 enum {
     FLUX_RPC_NORESPONSE = 1,
     FLUX_RPC_STREAMING = 2,
@@ -1066,9 +1049,9 @@ uint32_t flux_rpc_get_matchtag (flux_future_t *f);
 
 
 uint32_t flux_rpc_get_nodeid (flux_future_t *f);
-# 1669 "/workspaces/python/src/_core_clean.h"
+# 1652 "/workspaces/flux-python/src/_core_clean.h"
 int flux_panic (flux_t *h, uint32_t nodeid, int flags, const char *reason);
-# 1698 "/workspaces/python/src/_core_clean.h"
+# 1681 "/workspaces/flux-python/src/_core_clean.h"
 enum event_flags {
     FLUX_EVENT_PRIVATE = 1,
 };
@@ -1149,7 +1132,7 @@ flux_future_t *flux_event_publish_raw (flux_t *h,
 
 
 int flux_event_publish_get_seq (flux_future_t *f, int *seq);
-# 1813 "/workspaces/python/src/_core_clean.h"
+# 1796 "/workspaces/flux-python/src/_core_clean.h"
 enum {
     FLUX_MODSTATE_INIT = 0,
     FLUX_MODSTATE_RUNNING = 1,
@@ -1191,7 +1174,7 @@ bool flux_module_debug_test (flux_t *h, int flag, bool clear);
 
 
 int flux_module_set_running (flux_t *h);
-# 1902 "/workspaces/python/src/_core_clean.h"
+# 1885 "/workspaces/flux-python/src/_core_clean.h"
 const char *flux_attr_get (flux_t *h, const char *name);
 
 
@@ -1226,7 +1209,7 @@ const char *flux_get_hostbyrank (flux_t *h, uint32_t rank);
 
 
 int flux_get_rankbyhost (flux_t *h, const char *host);
-# 1950 "/workspaces/python/src/_core_clean.h"
+# 1933 "/workspaces/flux-python/src/_core_clean.h"
 char *flux_hostmap_lookup (flux_t *h,
                            const char *targets,
                            flux_error_t *errp);
@@ -1237,7 +1220,7 @@ char *flux_hostmap_lookup (flux_t *h,
 
 
 int flux_get_instance_starttime (flux_t *h, double *starttime);
-# 1988 "/workspaces/python/src/_core_clean.h"
+# 1971 "/workspaces/flux-python/src/_core_clean.h"
 enum flux_conf_flags {
     FLUX_CONF_INSTALLED=0,
     FLUX_CONF_INTREE=1,
@@ -1270,7 +1253,6 @@ int flux_conf_reload_decode (const flux_msg_t *msg, const flux_conf_t **conf);
 
 
 
-
 flux_conf_t *flux_conf_parse (const char *path, flux_error_t *error);
 
 
@@ -1290,13 +1272,13 @@ int flux_conf_vunpack (const flux_conf_t *conf,
 int flux_conf_unpack (const flux_conf_t *conf,
                       flux_error_t *error,
                       const char *fmt, ...);
-# 2072 "/workspaces/python/src/_core_clean.h"
+# 2054 "/workspaces/flux-python/src/_core_clean.h"
 flux_future_t *flux_barrier (flux_t *h, const char *name, int nprocs);
-# 2115 "/workspaces/python/src/_core_clean.h"
+# 2097 "/workspaces/flux-python/src/_core_clean.h"
 flux_future_t *flux_service_register (flux_t *h, const char *name);
-# 2127 "/workspaces/python/src/_core_clean.h"
+# 2109 "/workspaces/flux-python/src/_core_clean.h"
 flux_future_t *flux_service_unregister (flux_t *h, const char *name);
-# 2179 "/workspaces/python/src/_core_clean.h"
+# 2161 "/workspaces/flux-python/src/_core_clean.h"
 const char *flux_core_version_string (void);
 
 
@@ -1305,7 +1287,7 @@ const char *flux_core_version_string (void);
 
 
 int flux_core_version (int *major, int *minor, int *patch);
-# 2217 "/workspaces/python/src/_core_clean.h"
+# 2199 "/workspaces/flux-python/src/_core_clean.h"
 enum {
     FLUX_PLUGIN_RTLD_LAZY = 1,
     FLUX_PLUGIN_RTLD_NOW = 2,
@@ -1383,7 +1365,7 @@ flux_plugin_f flux_plugin_match_handler (flux_plugin_t *p, const char *topic);
 int flux_plugin_register (flux_plugin_t *p,
                           const char *name,
                           const struct flux_plugin_handler t[]);
-# 2304 "/workspaces/python/src/_core_clean.h"
+# 2286 "/workspaces/flux-python/src/_core_clean.h"
 int flux_plugin_aux_set (flux_plugin_t *p,
                          const char *key,
                          void *val,
@@ -1445,14 +1427,14 @@ int flux_plugin_arg_unpack (flux_plugin_arg_t *args, int flags,
                             const char *fmt, ...);
 int flux_plugin_arg_vunpack (flux_plugin_arg_t *args, int flags,
                              const char *fmt, va_list ap);
-# 2373 "/workspaces/python/src/_core_clean.h"
+# 2355 "/workspaces/flux-python/src/_core_clean.h"
 int flux_plugin_call (flux_plugin_t *p, const char *name,
                       flux_plugin_arg_t *args);
-# 2383 "/workspaces/python/src/_core_clean.h"
+# 2365 "/workspaces/flux-python/src/_core_clean.h"
 int flux_plugin_load_dso (flux_plugin_t *p, const char *path);
-# 2416 "/workspaces/python/src/_core_clean.h"
+# 2398 "/workspaces/flux-python/src/_core_clean.h"
 flux_future_t *flux_sync_create (flux_t *h, double minimum);
-# 2448 "/workspaces/python/src/_core_clean.h"
+# 2430 "/workspaces/flux-python/src/_core_clean.h"
 bool flux_disconnect_match (const flux_msg_t *msg1, const flux_msg_t *msg2);
 
 
@@ -1472,7 +1454,7 @@ bool flux_cancel_match (const flux_msg_t *msg1, const flux_msg_t *msg2);
 int flux_msglist_cancel (flux_t *h,
                          struct flux_msglist *l,
                          const flux_msg_t *msg);
-# 2517 "/workspaces/python/src/_core_clean.h"
+# 2499 "/workspaces/flux-python/src/_core_clean.h"
 void flux_stats_count (flux_t *h, const char *name, ssize_t count);
 
 
@@ -1508,10 +1490,10 @@ void flux_stats_set_prefix (flux_t *h, const char *fmt, ...);
 
 
 bool flux_stats_enabled (flux_t *h, const char *metric);
-# 2600 "/workspaces/python/src/_core_clean.h"
+# 2582 "/workspaces/flux-python/src/_core_clean.h"
 typedef struct flux_kvsdir flux_kvsdir_t;
 typedef struct flux_kvsitr flux_kvsitr_t;
-# 2615 "/workspaces/python/src/_core_clean.h"
+# 2597 "/workspaces/flux-python/src/_core_clean.h"
 flux_kvsdir_t *flux_kvsdir_create (flux_t *handle, const char *rootref,
                                    const char *key, const char *json_str);
 void flux_kvsdir_destroy (flux_kvsdir_t *dir);
@@ -1557,7 +1539,7 @@ const char *flux_kvsdir_rootref (const flux_kvsdir_t *dir);
 
 
 char *flux_kvsdir_key_at (const flux_kvsdir_t *dir, const char *key);
-# 2688 "/workspaces/python/src/_core_clean.h"
+# 2670 "/workspaces/flux-python/src/_core_clean.h"
 flux_future_t *flux_kvs_lookup (flux_t *h, const char *ns, int flags,
                                 const char *key);
 flux_future_t *flux_kvs_lookupat (flux_t *h, int flags, const char *key,
@@ -1580,14 +1562,14 @@ const char *flux_kvs_lookup_get_key (flux_future_t *f);
 
 
 int flux_kvs_lookup_cancel (flux_future_t *f);
-# 2738 "/workspaces/python/src/_core_clean.h"
+# 2720 "/workspaces/flux-python/src/_core_clean.h"
 flux_future_t *flux_kvs_getroot (flux_t *h, const char *ns, int flags);
-# 2747 "/workspaces/python/src/_core_clean.h"
+# 2729 "/workspaces/flux-python/src/_core_clean.h"
 int flux_kvs_getroot_get_treeobj (flux_future_t *f, const char **treeobj);
 int flux_kvs_getroot_get_blobref (flux_future_t *f, const char **blobref);
 int flux_kvs_getroot_get_sequence (flux_future_t *f, int *seq);
 int flux_kvs_getroot_get_owner (flux_future_t *f, uint32_t *owner);
-# 2779 "/workspaces/python/src/_core_clean.h"
+# 2761 "/workspaces/flux-python/src/_core_clean.h"
 typedef struct flux_kvs_txn flux_kvs_txn_t;
 
 flux_kvs_txn_t *flux_kvs_txn_create (void);
@@ -1617,7 +1599,7 @@ int flux_kvs_txn_unlink (flux_kvs_txn_t *txn, int flags,
 int flux_kvs_txn_symlink (flux_kvs_txn_t *txn, int flags,
                           const char *key, const char *ns,
                           const char *target);
-# 2857 "/workspaces/python/src/_core_clean.h"
+# 2839 "/workspaces/flux-python/src/_core_clean.h"
 enum kvs_commit_flags {
     FLUX_KVS_NO_MERGE = 1,
     FLUX_KVS_TXN_COMPACT = 2,
@@ -1635,21 +1617,21 @@ flux_future_t *flux_kvs_fence (flux_t *h, const char *ns, int flags,
 int flux_kvs_commit_get_treeobj (flux_future_t *f, const char **treeobj);
 int flux_kvs_commit_get_rootref (flux_future_t *f, const char **rootref);
 int flux_kvs_commit_get_sequence (flux_future_t *f, int *rootseq);
-# 2913 "/workspaces/python/src/_core_clean.h"
+# 2895 "/workspaces/flux-python/src/_core_clean.h"
 flux_future_t *flux_kvs_copy (flux_t *h,
                               const char *srcns,
                               const char *srckey,
                               const char *dstns,
                               const char *dstkey,
                               int commit_flags);
-# 2930 "/workspaces/python/src/_core_clean.h"
+# 2912 "/workspaces/flux-python/src/_core_clean.h"
 flux_future_t *flux_kvs_move (flux_t *h,
                               const char *srcns,
                               const char *srckey,
                               const char *dstns,
                               const char *dstkey,
                               int commit_flags);
-# 2953 "/workspaces/python/src/_core_clean.h"
+# 2935 "/workspaces/flux-python/src/_core_clean.h"
 enum kvs_op {
     FLUX_KVS_READDIR = 1,
     FLUX_KVS_READLINK = 2,
@@ -1661,7 +1643,7 @@ enum kvs_op {
     FLUX_KVS_WATCH_UNIQ = 128,
     FLUX_KVS_WATCH_APPEND = 256
 };
-# 2974 "/workspaces/python/src/_core_clean.h"
+# 2956 "/workspaces/flux-python/src/_core_clean.h"
 flux_future_t *flux_kvs_namespace_create (flux_t *h, const char *ns,
                                           uint32_t owner, int flags);
 flux_future_t *flux_kvs_namespace_create_with (flux_t *h, const char *ns,
@@ -1682,7 +1664,7 @@ int flux_kvs_wait_version (flux_t *h, const char *ns, int version);
 
 
 int flux_kvs_dropcache (flux_t *h);
-# 3029 "/workspaces/python/src/_core_clean.h"
+# 3011 "/workspaces/flux-python/src/_core_clean.h"
 typedef struct flux_command flux_cmd_t;
 
 
@@ -1692,12 +1674,17 @@ typedef struct flux_command flux_cmd_t;
 
 
 typedef struct flux_subprocess flux_subprocess_t;
-# 3049 "/workspaces/python/src/_core_clean.h"
+
+
+typedef struct flux_subprocess_server flux_subprocess_server_t;
+# 3035 "/workspaces/flux-python/src/_core_clean.h"
 typedef enum {
     FLUX_SUBPROCESS_INIT,
+    FLUX_SUBPROCESS_EXEC_FAILED,
     FLUX_SUBPROCESS_RUNNING,
     FLUX_SUBPROCESS_EXITED,
     FLUX_SUBPROCESS_FAILED,
+
     FLUX_SUBPROCESS_STOPPED,
 } flux_subprocess_state_t;
 
@@ -1737,6 +1724,7 @@ typedef struct {
 
 
 
+
     flux_subprocess_state_f on_state_change;
     flux_subprocess_output_f on_channel_out;
     flux_subprocess_output_f on_stdout;
@@ -1753,9 +1741,39 @@ typedef struct {
     flux_subprocess_hook_f post_fork;
     void *post_fork_arg;
 } flux_subprocess_hooks_t;
-# 3120 "/workspaces/python/src/_core_clean.h"
+# 3106 "/workspaces/flux-python/src/_core_clean.h"
+flux_subprocess_server_t *flux_subprocess_server_start (flux_t *h,
+                                                        const char *local_uri,
+                                                        uint32_t rank);
+
+
+typedef int (*flux_subprocess_server_auth_f) (const flux_msg_t *msg,
+                                              void *arg);
+
+
+
+
+
+
+void flux_subprocess_server_set_auth_cb (flux_subprocess_server_t *s,
+                                         flux_subprocess_server_auth_f fn,
+                                         void *arg);
+
+
+
+
+void flux_subprocess_server_stop (flux_subprocess_server_t *s);
+# 3138 "/workspaces/flux-python/src/_core_clean.h"
+int flux_subprocess_server_subprocesses_kill (flux_subprocess_server_t *s,
+                                              int signum,
+                                              double wait_time);
+
+
+int flux_subprocess_server_terminate_by_uuid (flux_subprocess_server_t *s,
+                                              const char *id);
+# 3156 "/workspaces/flux-python/src/_core_clean.h"
 void flux_standard_output (flux_subprocess_t *p, const char *stream);
-# 3129 "/workspaces/python/src/_core_clean.h"
+# 3165 "/workspaces/flux-python/src/_core_clean.h"
 flux_cmd_t * flux_cmd_create (int argc, char *argv[], char **env);
 
 
@@ -1829,12 +1847,12 @@ const char *flux_cmd_getenv (const flux_cmd_t *cmd, const char *name);
 
 int flux_cmd_setcwd (flux_cmd_t *cmd, const char *cwd);
 const char *flux_cmd_getcwd (const flux_cmd_t *cmd);
-# 3215 "/workspaces/python/src/_core_clean.h"
+# 3251 "/workspaces/flux-python/src/_core_clean.h"
 int flux_cmd_add_channel (flux_cmd_t *cmd, const char *name);
-# 3265 "/workspaces/python/src/_core_clean.h"
+# 3301 "/workspaces/flux-python/src/_core_clean.h"
 int flux_cmd_setopt (flux_cmd_t *cmd, const char *var, const char *val);
 const char *flux_cmd_getopt (flux_cmd_t *cmd, const char *var);
-# 3288 "/workspaces/python/src/_core_clean.h"
+# 3324 "/workspaces/flux-python/src/_core_clean.h"
 flux_subprocess_t *flux_exec (flux_t *h, int flags,
                               const flux_cmd_t *cmd,
                               const flux_subprocess_ops_t *ops,
@@ -1848,7 +1866,7 @@ flux_subprocess_t *flux_local_exec (flux_reactor_t *r, int flags,
 flux_subprocess_t *flux_rexec (flux_t *h, int rank, int flags,
                                const flux_cmd_t *cmd,
                                const flux_subprocess_ops_t *ops);
-# 3310 "/workspaces/python/src/_core_clean.h"
+# 3346 "/workspaces/flux-python/src/_core_clean.h"
 int flux_subprocess_stream_start (flux_subprocess_t *p, const char *stream);
 int flux_subprocess_stream_stop (flux_subprocess_t *p, const char *stream);
 int flux_subprocess_stream_status (flux_subprocess_t *p, const char *stream);
@@ -1868,11 +1886,11 @@ int flux_subprocess_write (flux_subprocess_t *p, const char *stream,
 
 
 int flux_subprocess_close (flux_subprocess_t *p, const char *stream);
-# 3341 "/workspaces/python/src/_core_clean.h"
+# 3377 "/workspaces/flux-python/src/_core_clean.h"
 const char *flux_subprocess_read (flux_subprocess_t *p,
                                   const char *stream,
                                   int len, int *lenp);
-# 3356 "/workspaces/python/src/_core_clean.h"
+# 3392 "/workspaces/flux-python/src/_core_clean.h"
 const char *flux_subprocess_read_line (flux_subprocess_t *p,
                                        const char *stream,
                                        int *lenp);
@@ -1883,10 +1901,10 @@ const char *flux_subprocess_read_line (flux_subprocess_t *p,
 const char *flux_subprocess_read_trimmed_line (flux_subprocess_t *p,
                                                const char *stream,
                                                int *lenp);
-# 3376 "/workspaces/python/src/_core_clean.h"
+# 3412 "/workspaces/flux-python/src/_core_clean.h"
 int flux_subprocess_read_stream_closed (flux_subprocess_t *p,
                                         const char *stream);
-# 3395 "/workspaces/python/src/_core_clean.h"
+# 3431 "/workspaces/flux-python/src/_core_clean.h"
 const char *flux_subprocess_getline (flux_subprocess_t *p,
                                      const char *stream,
                                      int *lenp);
@@ -1906,7 +1924,7 @@ flux_future_t *flux_subprocess_kill (flux_subprocess_t *p, int signo);
 
 void flux_subprocess_ref (flux_subprocess_t *p);
 void flux_subprocess_unref (flux_subprocess_t *p);
-# 3422 "/workspaces/python/src/_core_clean.h"
+# 3458 "/workspaces/flux-python/src/_core_clean.h"
 flux_subprocess_state_t flux_subprocess_state (flux_subprocess_t *p);
 
 
@@ -1914,6 +1932,7 @@ flux_subprocess_state_t flux_subprocess_state (flux_subprocess_t *p);
 const char *flux_subprocess_state_string (flux_subprocess_state_t state);
 
 int flux_subprocess_rank (flux_subprocess_t *p);
+
 
 
 
@@ -1954,22 +1973,7 @@ int flux_subprocess_aux_set (flux_subprocess_t *p,
 
 
 void *flux_subprocess_aux_get (flux_subprocess_t *p, const char *name);
-
-typedef void (*subprocess_log_f) (void *arg,
-                                  const char *file,
-                                  int line,
-                                  const char *func,
-                                  const char *subsys,
-                                  int level,
-                                  const char *fmt,
-                                  va_list args);
-
-
-
-int flux_set_default_subprocess_log (flux_t *h,
-                                     subprocess_log_f log_fn,
-                                     void *log_data);
-# 3510 "/workspaces/python/src/_core_clean.h"
+# 3530 "/workspaces/flux-python/src/_core_clean.h"
 enum job_submit_flags {
     FLUX_JOB_PRE_SIGNED = 1,
     FLUX_JOB_DEBUG = 2,
@@ -2031,10 +2035,10 @@ typedef uint64_t flux_jobid_t;
 
 
 int flux_job_id_parse (const char *s, flux_jobid_t *id);
-# 3580 "/workspaces/python/src/_core_clean.h"
+# 3600 "/workspaces/flux-python/src/_core_clean.h"
 int flux_job_id_encode (flux_jobid_t id, const char *type,
                         char *buf, size_t bufsz);
-# 3591 "/workspaces/python/src/_core_clean.h"
+# 3611 "/workspaces/flux-python/src/_core_clean.h"
 const char *flux_job_statetostr (flux_job_state_t state, const char *fmt);
 
 
@@ -2070,7 +2074,7 @@ int flux_job_wait_get_status (flux_future_t *f,
                               bool *success,
                               const char **errstr);
 int flux_job_wait_get_id (flux_future_t *f, flux_jobid_t *id);
-# 3644 "/workspaces/python/src/_core_clean.h"
+# 3664 "/workspaces/flux-python/src/_core_clean.h"
 flux_future_t *flux_job_list (flux_t *h,
                               int max_entries,
                               const char *attrs_json_str,
@@ -2151,11 +2155,9 @@ flux_future_t *flux_job_result (flux_t *h, flux_jobid_t id, int flags);
 
 int flux_job_result_get (flux_future_t *f,
                          const char **json_str);
-# 3742 "/workspaces/python/src/_core_clean.h"
+# 3762 "/workspaces/flux-python/src/_core_clean.h"
 int flux_job_result_get_unpack (flux_future_t *f, const char *fmt, ...);
-# 3756 "/workspaces/python/src/_core_clean.h"
-int flux_job_timeleft (flux_t *h, flux_error_t *errp, double *timeleft);
-# 3781 "/workspaces/python/src/_core_clean.h"
+# 3787 "/workspaces/flux-python/src/_core_clean.h"
 typedef struct flux_jobspec1 flux_jobspec1_t;
 typedef flux_error_t flux_jobspec1_error_t;
 
@@ -2253,7 +2255,7 @@ char *flux_jobspec1_encode (flux_jobspec1_t *jobspec, size_t flags);
 
 flux_jobspec1_t *flux_jobspec1_decode (const char *s,
                                        flux_jobspec1_error_t *error);
-# 3892 "/workspaces/python/src/_core_clean.h"
+# 3898 "/workspaces/flux-python/src/_core_clean.h"
 flux_jobspec1_t *flux_jobspec1_from_command (int argc,
                                              char **argv,
                                              char **env,
@@ -2265,7 +2267,7 @@ flux_jobspec1_t *flux_jobspec1_from_command (int argc,
 
 
 void flux_jobspec1_destroy (flux_jobspec1_t *jobspec);
-# 3912 "/workspaces/python/src/_core_clean.h"
+# 3918 "/workspaces/flux-python/src/_core_clean.h"
 extern "Python" void message_handler_wrapper(flux_t *, flux_msg_handler_t *, const flux_msg_t *, void *);
 
 
@@ -2275,7 +2277,7 @@ extern "Python" void signal_handler_wrapper(flux_reactor_t *, flux_watcher_t *, 
 
 
 extern "Python" void continuation_callback(flux_future_t *, void *);
-# 3938 "/workspaces/python/src/_core_clean.h"
+# 3944 "/workspaces/flux-python/src/_core_clean.h"
 extern int MPIR_being_debugged;
 extern void MPIR_Breakpoint (void);
 extern int get_mpir_being_debugged (void);

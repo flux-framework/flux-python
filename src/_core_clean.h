@@ -862,12 +862,6 @@ flux_watcher_t *flux_buffer_read_watcher_create (flux_reactor_t *r, int fd,
 
 flux_buffer_t *flux_buffer_read_watcher_get_buffer (flux_watcher_t *w);
 
-/* Get next chunk of data from a buffered read watcher. Gets the next
- * line if the watcher is line buffered.
- */
-const char *flux_buffer_read_watcher_get_data (flux_watcher_t *w,
-                                               int *lenp);
-
 /* 'cb' only called after fd closed (FLUX_POLLOUT) or error (FLUX_POLLERR) */
 flux_watcher_t *flux_buffer_write_watcher_create (flux_reactor_t *r, int fd,
                                                   int size, flux_watcher_f cb,
@@ -1448,17 +1442,6 @@ void flux_log_set_redirect (flux_t *h, flux_log_f fun, void *arg);
  */
 const char *flux_strerror (int errnum);
 
-/* Flux log function compatible with libutil llog interface
- */
-void flux_llog (void *arg,
-                const char *file,
-                int line,
-                const char *func,
-                const char *subsys,
-                int level,
-                const char *fmt,
-                va_list ap);
-
 #ifdef __cplusplus
 }
 #endif
@@ -2015,8 +1998,7 @@ void flux_conf_decref (const flux_conf_t *conf);
  */
 int flux_conf_reload_decode (const flux_msg_t *msg, const flux_conf_t **conf);
 
-/* Parse TOML config in 'path' and return a new flux_conf_t on success.
- * If path is a directory, then parse all files matching *.toml in path.
+/* Parse *.toml in 'path' directory.
  */
 flux_conf_t *flux_conf_parse (const char *path, flux_error_t *error);
 
@@ -2158,9 +2140,9 @@ extern "C" {
 /* The VERSION_STRING may include a "-N-hash" suffix from git describe
  * if this snapshot is not tagged.  This is not reflected in VERSION_PATCH.
  */
-#define FLUX_CORE_VERSION_STRING    "0.48.0"
+#define FLUX_CORE_VERSION_STRING    "0.46.0"
 #define FLUX_CORE_VERSION_MAJOR     0
-#define FLUX_CORE_VERSION_MINOR     48
+#define FLUX_CORE_VERSION_MINOR     46
 #define FLUX_CORE_VERSION_PATCH     0
 
 /* The version in 3 bytes, for numeric comparison.
@@ -3036,6 +3018,9 @@ typedef struct flux_command flux_cmd_t;
  */
 typedef struct flux_subprocess flux_subprocess_t;
 
+/*  flux_subprocess_server_t: Handler for a subprocess remote server */
+typedef struct flux_subprocess_server flux_subprocess_server_t;
+
 /*
  * Subprocess states, on changes, will lead to calls to
  * on_state_change below.
@@ -3043,14 +3028,17 @@ typedef struct flux_subprocess flux_subprocess_t;
  * Possible state changes:
  *
  * init -> running
+ * init -> exec failed
  * running -> exited
  * any state -> failed
  */
 typedef enum {
     FLUX_SUBPROCESS_INIT,         /* initial state */
+    FLUX_SUBPROCESS_EXEC_FAILED,  /* exec(2) has failed, only for rexec() */
     FLUX_SUBPROCESS_RUNNING,      /* exec(2) has been called */
     FLUX_SUBPROCESS_EXITED,       /* process has exited */
-    FLUX_SUBPROCESS_FAILED,       /* exec failure or other non-child error */
+    FLUX_SUBPROCESS_FAILED,       /* internal failure, catch all for
+                                   * all other errors */
     FLUX_SUBPROCESS_STOPPED,      /* process was stopped */
 } flux_subprocess_state_t;
 
@@ -3088,7 +3076,8 @@ typedef void (*flux_subprocess_hook_f) (flux_subprocess_t *p, void *arg);
 typedef struct {
     flux_subprocess_f on_completion;    /* Process exited and all I/O
                                          * complete, will not be
-                                         * called if FAILED state reached.
+                                         * called if EXEC_FAILED or
+                                         * FAILED states reached.
                                          */
     flux_subprocess_state_f on_state_change;  /* Process state change        */
     flux_subprocess_output_f on_channel_out; /* Read from channel when ready */
@@ -3106,6 +3095,53 @@ typedef struct {
     flux_subprocess_hook_f post_fork;
     void *post_fork_arg;
 } flux_subprocess_hooks_t;
+
+/*
+ *  General support:
+ */
+
+/*  Start a subprocess server on the handle `h`. Registers message
+ *   handlers, etc for remote execution.
+ */
+flux_subprocess_server_t *flux_subprocess_server_start (flux_t *h,
+                                                        const char *local_uri,
+                                                        uint32_t rank);
+
+
+typedef int (*flux_subprocess_server_auth_f) (const flux_msg_t *msg,
+                                              void *arg);
+
+/*   Register an authorization function to the subprocess server
+ *
+ *   The registered function should return 0 to allow the request to
+ *    proceed, and -1 with errno set to deny the request.
+ */
+void flux_subprocess_server_set_auth_cb (flux_subprocess_server_t *s,
+                                         flux_subprocess_server_auth_f fn,
+                                         void *arg);
+
+/*  Stop a subprocess server / cleanup flux_subprocess_server_t.  Will
+ *  send a SIGKILL to all remaining subprocesses.
+ */
+void flux_subprocess_server_stop (flux_subprocess_server_t *s);
+
+/* Send all subprocesses signal and wait up to wait_time seconds for
+ * all subprocesses to complete.  This is typically called to send
+ * SIGTERM before calling flux_subprocess_server_stop(), allowing
+ * users to send a signal to inform subprocesses to complete / cleanup
+ * before they are sent SIGKILL.
+ *
+ * This function will enter the reactor to wait for subprocesses to
+ * complete, should only be called on cleanup path when primary
+ * reactor has exited.
+ */
+int flux_subprocess_server_subprocesses_kill (flux_subprocess_server_t *s,
+                                              int signum,
+                                              double wait_time);
+
+/* Terminate all subprocesses started by a sender id */
+int flux_subprocess_server_terminate_by_uuid (flux_subprocess_server_t *s,
+                                              const char *id);
 
 /*
  * Convenience Functions:
@@ -3427,7 +3463,8 @@ const char *flux_subprocess_state_string (flux_subprocess_state_t state);
 
 int flux_subprocess_rank (flux_subprocess_t *p);
 
-/* Returns the errno causing the FLUX_SUBPROCESS_FAILED states to be reached.
+/* Returns the errno causing the FLUX_SUBPROCESS_EXEC_FAILED or
+ * FLUX_SUBPROCESS_FAILED states to be reached.
  */
 int flux_subprocess_fail_errno (flux_subprocess_t *p);
 
@@ -3466,23 +3503,6 @@ int flux_subprocess_aux_set (flux_subprocess_t *p,
  *   no such context exists, then NULL is returned.
  */
 void *flux_subprocess_aux_get (flux_subprocess_t *p, const char *name);
-
-typedef void (*subprocess_log_f) (void *arg,
-                                  const char *file,
-                                  int line,
-                                  const char *func,
-                                  const char *subsys,
-                                  int level,
-                                  const char *fmt,
-                                  va_list args);
-
-/* Set default internal logging function.
- */
-int flux_set_default_subprocess_log (flux_t *h,
-                                     subprocess_log_f log_fn,
-                                     void *log_data);
-
-
 
 #ifdef __cplusplus
 }
@@ -3740,20 +3760,6 @@ int flux_job_result_get (flux_future_t *f,
  *
  */
 int flux_job_result_get_unpack (flux_future_t *f, const char *fmt, ...);
-
-
-/*  Get remaining time in floating point seconds for the current job or
- *  enclosing instancce (i.e., if the current process is associated with
- *  a flux instance, but is not part of a parallel job).
- *
- *  Returns 0 on success with timeleft assigned to the remaining time.
- *  If there is no expiration in the current context (e.g. the job has
- *  no timelimit), then timeleft is set to infinity. If the job is not
- *  in RUN state, or the job has expired, then timeleft is set to 0.
- *
- *  Returns -1 with error string assinged to 'errp' on failure.
- */
-int flux_job_timeleft (flux_t *h, flux_error_t *errp, double *timeleft);
 
 #ifdef __cplusplus
 }

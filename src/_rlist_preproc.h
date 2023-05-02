@@ -1,10 +1,10 @@
-# 1 "/workspaces/python/src/_rlist_clean.h"
+# 1 "/workspaces/flux-python/src/_rlist_clean.h"
 # 1 "<built-in>"
 # 1 "<command-line>"
 # 1 "/usr/include/stdc-predef.h" 1 3 4
 # 1 "<command-line>" 2
-# 1 "/workspaces/python/src/_rlist_clean.h"
-# 442 "/workspaces/python/src/_rlist_clean.h"
+# 1 "/workspaces/flux-python/src/_rlist_clean.h"
+# 442 "/workspaces/flux-python/src/_rlist_clean.h"
 typedef void (*flux_free_f)(void *arg);
 
 
@@ -13,7 +13,7 @@ typedef void (*flux_free_f)(void *arg);
 typedef struct {
     char text[160];
 } flux_error_t;
-# 462 "/workspaces/python/src/_rlist_clean.h"
+# 462 "/workspaces/flux-python/src/_rlist_clean.h"
 struct rlist {
     int total;
     int avail;
@@ -69,7 +69,7 @@ struct rlist *rlist_copy_allocated (const struct rlist *orig);
 struct rlist *rlist_copy_ranks (const struct rlist *rl, struct idset *ranks);
 
 struct rlist *rlist_copy_cores (const struct rlist *rl);
-# 527 "/workspaces/python/src/_rlist_clean.h"
+# 527 "/workspaces/flux-python/src/_rlist_clean.h"
 struct rlist *rlist_copy_constraint (const struct rlist *rl,
                                      json_t *constraint,
                                      flux_error_t *errp);
@@ -93,7 +93,7 @@ int rlist_remap (struct rlist *rl);
 
 
 int rlist_assign_hosts (struct rlist *rl, const char *hosts);
-# 561 "/workspaces/python/src/_rlist_clean.h"
+# 561 "/workspaces/flux-python/src/_rlist_clean.h"
 int rlist_rerank (struct rlist *rl, const char *hosts, flux_error_t *error);
 
 
@@ -150,7 +150,7 @@ struct hostlist * rlist_nodelist (const struct rlist *rl);
 
 
 struct idset * rlist_ranks (const struct rlist *rl);
-# 631 "/workspaces/python/src/_rlist_clean.h"
+# 631 "/workspaces/flux-python/src/_rlist_clean.h"
 struct idset * rlist_hosts_to_ranks (const struct rlist *rl,
                                      const char *hosts,
                                      flux_error_t *err);
@@ -185,11 +185,11 @@ struct rlist *rlist_from_R (const char *R);
 struct rlist *rlist_from_json (json_t *o, json_error_t *err);
 
 struct rlist *rlist_from_hwloc (int my_rank, const char *xml);
-# 678 "/workspaces/python/src/_rlist_clean.h"
+# 678 "/workspaces/flux-python/src/_rlist_clean.h"
 int rlist_verify (flux_error_t *error,
                   const struct rlist *expected,
                   const struct rlist *actual);
-# 696 "/workspaces/python/src/_rlist_clean.h"
+# 696 "/workspaces/flux-python/src/_rlist_clean.h"
 struct rlist * rlist_alloc (struct rlist *rl,
                             const struct rlist_alloc_info *ai,
                             flux_error_t *errp);

@@ -18,9 +18,6 @@
 /* Define if building universal (internal helper macro) */
 /* #undef AC_APPLE_UNIVERSAL_BUILD */
 
-/* assume broken locale configuration and disable non-ascii characters */
-/* #undef ASSUME_BROKEN_LOCALE */
-
 /* code coverage support */
 /* #undef CODE_COVERAGE_ENABLED */
 
@@ -101,6 +98,9 @@
 
 /* Define to 1 if you have the `m' library (-lm). */
 #define HAVE_LIBM 1
+
+/* Enable PMIx bootstrap */
+/* #undef HAVE_LIBPMIX */
 
 /* Define to 1 if you have the `rt' library (-lrt). */
 /* #undef HAVE_LIBRT */
@@ -298,7 +298,7 @@
 #define PACKAGE_NAME "flux-core"
 
 /* Define to the full name and version of this package. */
-#define PACKAGE_STRING "flux-core 0.48.0"
+#define PACKAGE_STRING "flux-core 0.46.0"
 
 /* Define to the one symbol short name of this package. */
 #define PACKAGE_TARNAME "flux-core"
@@ -307,7 +307,7 @@
 #define PACKAGE_URL ""
 
 /* Define to the version of this package. */
-#define PACKAGE_VERSION "0.48.0"
+#define PACKAGE_VERSION "0.46.0"
 
 /* Define remote shell program to be used by the ssh:// connector */
 #define PATH_SSH "/usr/bin/rsh"
@@ -340,7 +340,7 @@
 #define STDC_HEADERS 1
 
 /* Version number of package */
-#define VERSION "0.48.0"
+#define VERSION "0.46.0"
 
 /* build with jemalloc */
 /* #undef WITH_JEMALLOC */

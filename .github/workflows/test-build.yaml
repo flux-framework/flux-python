@@ -1,0 +1,24 @@
+name: test-build flux-python
+
+on:
+  pull_request: []
+  schedule:
+    - cron: "5 4 * * *"
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    services:
+      api:
+        image: fluxrm/testenv:focal
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Build Flux Core
+      run: /bin/bash .github/scripts/setup.sh
+
+    - name: Build Python Bindings
+      run: |
+        mv /code/src/bindings/python/flux ./flux
+        python3 setup.py sdist bdist_wheel --flux-root /code --security-src $HOME/security --security-include /usr/local/include/flux/security --version develop
+
