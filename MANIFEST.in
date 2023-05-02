@@ -1,0 +1,8 @@
+include README.md
+recursive-include flux _flux src *
+recursive-include src *.h
+prune env*
+global-exclude .env
+global-exclude *.py[co]
+recursive-exclude .git *
+global-exclude __pycache__
