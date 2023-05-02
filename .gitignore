@@ -7,3 +7,5 @@ flux.egg-info
 .eggs
 _flux
 dist
+flux
+flux_python.egg-info/

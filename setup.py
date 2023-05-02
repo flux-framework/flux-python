@@ -26,11 +26,17 @@ from setuptools import setup as _setup
 from distutils.core import setup, Command
 
 # Metadata
-package_name = "flux"
+package_name = "flux-python"
 package_version = "0.46.0"
-package_description = "Bindings to the flux resource manager API"
+package_description = "Python bindings for the flux resource manager API"
 package_url = "https://github.com/flux-framework/flux-python"
 package_keywords = "flux, job manager, orchestration, hpc"
+
+try:
+    with open("README.md") as filey:
+        package_long_description = filey.read()
+except Exception:
+    package_long_description = description
 
 # Setup variables for dependencies
 cffi_dep = "cffi>=1.1"
@@ -340,6 +346,7 @@ def get_parser():
     parser.add_argument(
         "--flux-root", dest="flux_root", help="Root to flux source code.", required=True
     )
+    parser.add_argument("--version", help="version to install", required=True)
     parser.add_argument(
         "--security-src",
         dest="security_src",
@@ -359,7 +366,7 @@ def clean_args():
     """
     Ensure we remove extra flags that the second installed won't know about.
     """
-    removed = ["--security-src", "--security-include", "--flux-root"]
+    removed = ["--security-src", "--security-include", "--flux-root", "--version"]
     cleaned = []
     contenders = copy.deepcopy(sys.argv)
     while contenders:
@@ -380,9 +387,14 @@ def setup():
     # If an error occurs while parsing the arguments, the interpreter will exit with value 2
     args, extra = parser.parse_known_args()
 
+    global package_version
     global flux_root
     global security_src
     global security_include
+
+    # Did we set a custom version
+    if args.version:
+        package_version = args.version
 
     flux_root = args.flux_root
     security_src = args.security_src
@@ -420,6 +432,8 @@ def setup():
         name=package_name,
         version=package_version,
         description=package_description,
+        long_description=package_long_description,
+        long_description_content_type="text/markdown",
         keywords=package_keywords,
         url=package_url,
         setup_requires=[cffi_dep],

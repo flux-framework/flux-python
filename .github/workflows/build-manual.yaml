@@ -1,0 +1,54 @@
+name: build-manual flux-python
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version of flux to build'
+        required: true
+      release_version:
+        description: 'Pypi version to release to'
+        required: true
+
+jobs:
+  build-manual:
+    runs-on: ubuntu-latest
+    services:
+      api:
+        image: fluxrm/testenv:focal
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Build Flux Core
+      env:
+        FLUX_VERSION: ${{ inputs.version }}
+      run: |
+        export FLUX_VERSION
+        /bin/bash .github/scripts/setup.sh
+
+    - name: Build Python Bindings
+      run: |
+        ls /code   
+        ls ./            
+        mv /code/src/bindings/python/flux ./flux
+        python3 setup.py sdist bdist_wheel --flux-root /code --security-src $HOME/security --security-include /usr/local/include/flux/security --version ${{ inputs.release_version }}
+        sudo ldconfig
+    
+    - name: Prepare Wheel
+      run: conda create --quiet --name env twine
+
+    - name: Install dependencies
+      run: |
+        export PATH="/usr/share/miniconda/bin:$PATH"
+        source activate env
+        pip install -e .
+        pip install setuptools wheel twine
+
+    - name: Build and publish
+      env:
+        TWINE_USERNAME: ${{ secrets.PYPI_USER }}
+        TWINE_PASSWORD: ${{ secrets.PYPI_PASS }}
+      run: |
+        export PATH="/usr/share/miniconda/bin:$PATH"
+        source activate env
+        twine upload dist/*.tar.gz

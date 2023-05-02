@@ -1,16 +1,16 @@
-# 1 "/workspaces/python/src/_idset_clean.h"
+# 1 "/workspaces/flux-python/src/_idset_clean.h"
 # 1 "<built-in>"
 # 1 "<command-line>"
 # 1 "/usr/include/stdc-predef.h" 1 3 4
 # 1 "<command-line>" 2
-# 1 "/workspaces/python/src/_idset_clean.h"
-# 23 "/workspaces/python/src/_idset_clean.h"
+# 1 "/workspaces/flux-python/src/_idset_clean.h"
+# 23 "/workspaces/flux-python/src/_idset_clean.h"
 enum idset_flags {
     IDSET_FLAG_AUTOGROW = 1,
     IDSET_FLAG_BRACKETS = 2,
     IDSET_FLAG_RANGE = 4,
 };
-# 37 "/workspaces/python/src/_idset_clean.h"
+# 37 "/workspaces/flux-python/src/_idset_clean.h"
 struct idset *idset_create (size_t size, int flags);
 void idset_destroy (struct idset *idset);
 
@@ -97,7 +97,7 @@ struct idset *idset_difference (const struct idset *a, const struct idset *b);
 
 
 int idset_subtract (struct idset *a, const struct idset *b);
-# 131 "/workspaces/python/src/_idset_clean.h"
+# 131 "/workspaces/flux-python/src/_idset_clean.h"
 struct idset *idset_intersect (const struct idset *a, const struct idset *b);
 
 
