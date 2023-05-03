@@ -4,6 +4,8 @@ from pathlib import Path
 
 from cffi import FFI
 
+# IMPORTANT: this file needs to be updated if rlist.h
+# is decided to be included.
 # Ensure paths are in _flux
 here = os.path.abspath(os.path.dirname(__file__))
 
@@ -23,32 +25,29 @@ ffi = FFI()
 ffi.include(hostlist_ffi)
 ffi.include(idset_ffi)
 
+# Note that czmq was originally czmq_containers.h
 ffi.set_source(
     "_flux._rlist",
     """
 #include <jansson.h>
-#include <src/include/flux/core.h>
-#include <src/include/flux/idset.h>
-#include <src/common/libczmqcontainers/czmq_containers.h>
-#include <src/common/libflux/types.h>
-#include <src/common/librlist/rlist.h>
-#include <src/common/libidset/idset.h>
+#include <flux/core.h>
+#include <flux/idset.h>
+#include <czmq.h>
+#include <flux/types.h>
+#include <flux/rlist.h>
+#include <flux/idset.h>
             """,
     libraries=[
         "rlist",
         "idset",
         "flux-idset",
         "flux-core",
-        "flux",
-        "flux-internal",
         "hwloc",
         "jansson",
     ],
     library_dirs=[
-        f"{root}/src/common/libflux/.libs",
-        f"{root}/src/common/librlist/.libs",
-        f"{root}/src/common/libidset/.libs",
-        f"{root}/src/common/.libs",
+        root,
+        f"{root}/lib",
     ],
     include_dirs=[
         root,
@@ -56,16 +55,10 @@ ffi.set_source(
         # hwloc
         "/usr/lib/x86_64-linux-gnu",
         f"{root}/config",
-        f"{root}/src/include",
-        f"{root}/src/common/libflux",
-        f"{root}/src/common/librlist",
-        f"{root}/src/common/libidset",
+        f"{root}/include",
     ],
     extra_compile_args=[
-        f"-L{root}/src/common/.libs",
-        f"-L{root}/src/common/librlist/.libs",
-        f"-L{root}/src/common/libflux/.libs",
-        f"-L{root}/src/common/libidset/.libs",
+        f"-L{root}/lib",
     ],
 )
 

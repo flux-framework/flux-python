@@ -2,7 +2,7 @@
 # Copyright 2014-2023 Lawrence Livermore National Security, LLC
 # (c.f. AUTHORS, NOTICE.LLNS, COPYING)
 #
-# This file is part of the Flux resource manager framework.
+# This file is part of the Flux resource manager framework.f
 # For details, see https://github.com/flux-framework.
 #
 # SPDX-License-Identifier: LGPL-3.0
@@ -12,8 +12,6 @@
 # This should only be used to generate a wheel, as the build will not be
 # portable to a system with different Flux / Flux Security paths.
 
-import argparse
-import copy
 import os
 import re
 import shutil
@@ -27,7 +25,7 @@ from distutils.core import setup, Command
 
 # Metadata
 package_name = "flux-python"
-package_version = "0.46.0"
+package_version = "0.48.0-rc2"
 package_description = "Python bindings for the flux resource manager API"
 package_url = "https://github.com/flux-framework/flux-python"
 package_keywords = "flux, job manager, orchestration, hpc"
@@ -36,58 +34,59 @@ try:
     with open("README.md") as filey:
         package_long_description = filey.read()
 except Exception:
-    package_long_description = description
+    package_long_description = package_description
 
 # Setup variables for dependencies
 cffi_dep = "cffi>=1.1"
 
 # src/bindings/python
-here = os.path.dirname(os.path.abspath(__file__))
+root = os.path.dirname(os.path.abspath(__file__))
+source = os.path.join(root, "src")
 
-# top level with src, etc (/code here)
-root = here
+def find_flux():
+    """
+    Find flux install via the executable!
+    """
+    path = shutil.which('flux')
+    if not path:
+        sys.exit('Cannot find executable flux, which is required to be on PATH to find the install location.')
+    # /usr/local/bin/flux --> /usr/local
+    return os.path.dirname(os.path.dirname(path))
+
+flux_root = find_flux()
 
 # Module specific default options files. Format strings below will be populated
 # after receiving the custom varibles from the user
 options = {
     "core": {
-        "path": "{root}",
-        "search": [os.path.join("{root}", "src", "common", "libflux")],
-        "header": "src/include/flux/core.h",
-        "additional_headers": [
-            os.path.join(here, "src/callbacks.h"),
-            "src/common/libdebugged/debugged.h",
-        ],
+        "header": "include/flux/core.h",
+        "additional_headers": [os.path.join(source, "callbacks.h")]
     },
     "hostlist": {
-        "path": "{root}/src/common/libhostlist",
-        "header": "src/include/flux/hostlist.h",
+        "header": "include/flux/hostlist.h",
     },
+
+    # Note that rlist is currently disabled, so this
+    # set of metadata doesn't matter
     "rlist": {
-        "path": "{root}/src/common/librlist",
-        "search": [
-            "{root}",
-            os.path.join("{root}", "config"),
-        ],
-        "header": "src/common/librlist/rlist.h",
+        "header": "include/flux/rlist.h",
         "ignore_headers": ["czmq_containers"],
     },
     "idset": {
-        "path": "{root}/src/common/libidset",
-        "header": "src/common/libidset/idset.h",
+        "header": "include/flux/idset.h",
     },
     # path and header are set by --flux-security
-    "security": {},
+    "security": {
+        "header": "include/flux/security/sign.h",
+        "search": ["{root}/include/flux/security"],
+    },
 }
 
 # Global variables for build type, corresponds to
-build_types = {"core", "idset", "rlist", "security", "hostlist"}
+build_types = {"core", "idset", "security", "hostlist"}
 
-# Flux root (with source code) to install for
-flux_root = None
-security_src = None
-security_include = None
-
+# rlist.h is disabled for now, as it requires the flux-core build
+# build_types = {"core", "idset", "rlist", "security", "hostlist"}
 
 @contextmanager
 def workdir(dirname):
@@ -145,10 +144,8 @@ class PrepareFluxHeaders:
     a proper setup.py. We might eventually be able to separate them further.
     """
 
-    def __init__(self, root, security_src, security_include):
+    def __init__(self, root):
         self.flux_root = root
-        self.security_src = security_src
-        self.security_include = security_include
         self.search = ""
         self.skip_build = False
         self.search = []
@@ -164,27 +161,14 @@ class PrepareFluxHeaders:
             value = []
         setattr(self, attr, value)
 
-    def set_builds(self):
-        """
-        Given user preferences on the command line, set build flags
-        for additional modules.
-        """
-        global options
-        options["security"]["path"] = self.security_include
-        options["security"]["search"] = [self.security_src]
-        options["security"]["header"] = os.path.join(
-            self.security_src, "src", "lib", "sign.h"
-        )
 
     def run(self):
         """
         Run the install
         """
-        self.set_builds()
         for build_type in build_types:
             cleaner = HeaderCleaner(
                 self.flux_root,
-                custom_search=self.search,
                 build_type=build_type,
                 **options[build_type],
             )
@@ -192,7 +176,7 @@ class PrepareFluxHeaders:
 
 
 class HeaderCleaner:
-    def __init__(self, root, custom_search, build_type, **kwargs):
+    def __init__(self, root, build_type, **kwargs):
         """
         Main class to run a clean!
         """
@@ -201,22 +185,18 @@ class HeaderCleaner:
             "search",
             "skip_build",
             "hostlist",
-            "rlist",
             "idset",
-            "security",
-            "security_include",
-            "security_src",
         ]
         self.root = root
-        self.path = kwargs["path"].format(root=root)
         self.build_type = build_type
-        self.preproc_output = os.path.join(here, "src", "_%s_preproc.h" % build_type)
-        self.output = os.path.join(here, "src", "_%s_clean.h" % build_type)
+        self.preproc_output = os.path.join(source, "_%s_preproc.h" % build_type)
+        self.output = os.path.join(source, "_%s_clean.h" % build_type)
 
         # Relative path to header is required
         self.header = kwargs["header"]
 
         # Update search to include defaults
+        custom_search = [os.path.join(self.root, "include"), os.path.join(self.root, "lib"), os.path.join(self.root, "include", "flux")]
         self.search = custom_search + [
             x.format(root=root) for x in kwargs.get("search", [])
         ]
@@ -245,7 +225,7 @@ class HeaderCleaner:
         self.mega_header = ""
 
         # Prepend 'path' option to search list:
-        self.search.insert(0, self.path)
+        self.search.insert(0, flux_root)
         self.search = [os.path.abspath(f) for f in self.search]
         with workdir(self.root):
             self.process_header()
@@ -260,27 +240,28 @@ class HeaderCleaner:
             clean_header.write(self.mega_header)
 
         # -E '-D__attribute__(...)=' and re-read
-        self.preprocess_gcc(self.output)
+        self.preprocess_gcc()
         self.mega_header = read_file(self.output)
 
         # Remove compiler directives
         self.clean_compiler_directives()
 
-    def preprocess_gcc(self, filename):
+    def preprocess_gcc(self):
         """
-        Compile with gcc -E '-D__attribute__(...)='
+        Compile with gcc -E '-D__attribute__(...)=' etc.
         """
         gcc = shutil.which("gcc")
         if not gcc:
             sys.exit("Cannot find gcc compiler.")
         cmd = [
-            gcc,
-            "-E",
-            "-D__attribute__(...)=",
-            self.output,
-            "-o",
-            self.preproc_output,
-        ]
+              gcc,
+              "-E",
+              "-D __attribute__(...)=",
+              '-DFLUX_DEPRECATED(...)=',
+              self.output,
+              "-o",
+              self.preproc_output,
+          ]
         print(" ".join(cmd))
         res = subprocess.call(cmd)
         if res != 0:
@@ -336,83 +317,26 @@ class HeaderCleaner:
         # Flag as checked
         self.checked_heads[f] = 1
 
-
-# Setup.py logic goes here
-def get_parser():
-    parser = argparse.ArgumentParser(
-        description="Build Parser",
-        formatter_class=argparse.RawTextHelpFormatter,
-    )
-    parser.add_argument(
-        "--flux-root", dest="flux_root", help="Root to flux source code.", required=True
-    )
-    parser.add_argument("--version", help="version to install", required=True)
-    parser.add_argument(
-        "--security-src",
-        dest="security_src",
-        help="Security source code.",
-        required=True,
-    )
-    parser.add_argument(
-        "--security-include",
-        dest="security_include",
-        help="Security include path.",
-        required=True,
-    )
-    return parser
-
-
-def clean_args():
-    """
-    Ensure we remove extra flags that the second installed won't know about.
-    """
-    removed = ["--security-src", "--security-include", "--flux-root", "--version"]
-    cleaned = []
-    contenders = copy.deepcopy(sys.argv)
-    while contenders:
-        arg = contenders.pop(0)
-        if arg in removed:
-            contenders.pop(0)
-        else:
-            cleaned.append(arg)
-    sys.argv = cleaned
-
-
 def setup():
     """
     A wrapper to run setup. This likely isn't best practice, but is a first effort.
     """
-    parser = get_parser()
-
-    # If an error occurs while parsing the arguments, the interpreter will exit with value 2
-    args, extra = parser.parse_known_args()
-
-    global package_version
     global flux_root
-    global security_src
     global security_include
-
-    # Did we set a custom version
-    if args.version:
-        package_version = args.version
-
-    flux_root = args.flux_root
-    security_src = args.security_src
-    security_include = args.security_include
 
     # Always set the install root to the environment
     set_envar("FLUX_INSTALL_ROOT", flux_root)
-    set_envar("FLUX_SECURITY_SOURCE", security_src)
-    set_envar("FLUX_SECURITY_INCLUDE", security_include)
 
-    # Clean arguments we added
-    clean_args()
+    # The flux security path should be in the same root, under includes
+    security_include = os.path.join(flux_root, "include", "flux", "security")
+    if not os.path.exists(security_include):
+        sys.exit(f'Cannot find flux security under expected path {security_include}')
 
     # We only want this to run on creating the tarball
     command = sys.argv[1]
     if command in ["sdist", "build", "build_ext"]:
         # Custom setup commands, first without cffi to prepare headers
-        prepare = PrepareFluxHeaders(flux_root, security_src, security_include)
+        prepare = PrepareFluxHeaders(flux_root)
         prepare.run()
 
     # Request to install additional modules (we always do core0

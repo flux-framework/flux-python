@@ -1,6 +1,9 @@
 #!/bin/bash
 
+set -euo pipefail
+
 # This will be empty for nightly test, and we will clone master branch
+FLUX_VERSION=${FLUX_VERSION:-0.48.0}
 echo "Flux Version is ${FLUX_VERSION}"
 
 here=$(pwd)
@@ -68,6 +71,7 @@ chmod +x etc/gen-cmdhelp.py
 ./autogen.sh || echo "No autogen here"
 ./configure --prefix=/usr/local
 make
+sudo make install
 sudo make install
 sudo ldconfig   
 cd ${here}

@@ -2,6 +2,8 @@ __pycache__
 .deps
 build
 src/.libs
+src/*preproc.h
+src/*clean.h
 src/*.c
 flux.egg-info
 .eggs

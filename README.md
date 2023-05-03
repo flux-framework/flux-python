@@ -24,7 +24,7 @@ If you want to build a custom version with Flux core you can do:
 
 ```bash
 rm -rf ~/flux-core
-export FLUX_VERSION=0.46.0
+export FLUX_VERSION=0.48.0
 wget https://github.com/flux-framework/flux-core/releases/download/v${FLUX_VERSION}/flux-core-${FLUX_VERSION}.tar.gz
 tar -xzvf flux-core-${FLUX_VERSION}.tar.gz
 sudo mv flux-core-${FLUX_VERSION} ~/flux-core
@@ -35,17 +35,46 @@ make
 sudo make install
 ```
 
-And then build your custom wheel:
+And then copy over the Python source to "flux" and build your custom wheel:
 
 ```bash
+$ rm -rf /workspaces/flux-python/flux
+$ cp -R src/bindings/python/flux /workspaces/flux-python/flux
 $ cd /workspaces/flux-python
-$ python3 setup.py sdist bdist_wheel --flux-root /home/vscode/flux-core --security-src /home/vscode/security --security-include /usr/local/include/flux/security --version 0.46.0-rc-0
+$ python3 setup.py sdist
 ```
 
 And if you want to upload:
 
 ```bash
 $ twine upload dist/*.tar.gz
+```
+
+## Install on a System
+
+Since we need to link to Flux libraries, you are advised to install flux and flux-security in the same location
+that will be discovered via the executable "flux," so typically `/usr` or `/usr/local`. You can do either:
+
+```bash
+# Find the flux version on your system
+flux --version
+
+# Install the bindings that match that version
+pip install flux-python==0.48.0
+```
+And if you are having trouble with the WCI cache, you can also wget the [file directly from pypi]()
+and install the .tar.gz directly.
+
+```bash
+wget https://files.pythonhosted.org/packages/25/fb/02951d80e44a19db291f0e7370d4e7d82c0c1b17709a37913881f958dff7/flux-python-0.48.0rc0.tar.gz
+pip install flux-python-0.48.0rc0.tar.gz
+```
+
+If you install to a local (personal) location (e.g., `$HOME/.local`) you'll need to add this to your `PYTHONPATH`
+
+```bash
+# The directory "flux" is under the site-packages here
+export PYTHONPATH=$HOME/.local/lib/python3.7/site-packages
 ```
 
 ### Building Modules

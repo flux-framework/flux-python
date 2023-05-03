@@ -6,9 +6,6 @@ on:
       version:
         description: 'Version of flux to build'
         required: true
-      release_version:
-        description: 'Pypi version to release to'
-        required: true
 
 jobs:
   build-manual:
@@ -31,7 +28,7 @@ jobs:
         ls /code   
         ls ./            
         mv /code/src/bindings/python/flux ./flux
-        python3 setup.py sdist bdist_wheel --flux-root /code --security-src $HOME/security --security-include /usr/local/include/flux/security --version ${{ inputs.release_version }}
+        python3 setup.py sdist
         sudo ldconfig
     
     - name: Prepare Wheel

@@ -12,29 +12,22 @@ core_c_file = os.path.join(here, "_hostlist.c")
 
 ffi = FFI()
 
-##include <flux/hostlist.h>
-
 ffi.set_source(
     "_flux._hostlist",
     """
-#include <src/include/flux/hostlist.h>
-#include <src/common/libhostlist/hostlist.h>
+#include <flux/hostlist.h>
             """,
-    libraries=["flux-core", "flux", "hostlist", "flux-hostlist", "flux-internal"],
+    libraries=["flux-core", "flux-hostlist"],
     library_dirs=[
-        f"{root}/src/common/libflux/.libs",
-        f"{root}/src/common/libhostlist/.libs",
-        f"{root}/src/common/.libs",
+        root,
+        f"{root}/lib",
     ],
     include_dirs=[
         root,
-        f"{root}/src/include",
-        f"{root}/src/common/libflux",
+        f"{root}/include",
     ],
     extra_compile_args=[
-        f"-L{root}/src/common/.libs",
-        f"-L{root}/src/common/libhostlist/.libs",
-        f"-L{root}/src/common/libflux/.libs",
+        f"-L{root}/lib",
     ],
 )
 
