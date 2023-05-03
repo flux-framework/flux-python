@@ -15,30 +15,61 @@ core_c_file = os.path.join(here, "_core.c")
 ffi.set_source(
     "_flux._core",
     """
-#include <src/include/flux/core.h>
-#include <src/common/libdebugged/debugged.h>
+#include <flux/core.h>
 
+#ifndef _FLUX_CORE_DEBUGGED_H
+#define _FLUX_CORE_DEBUGGED_H
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+extern int MPIR_being_debugged;
+extern void MPIR_Breakpoint (void);
+extern int get_mpir_being_debugged (void);
+extern void set_mpir_being_debugged (int v);
+
+#ifdef __cplusplus
+}
+#endif
+
+#endif /* !_FLUX_CORE_DEBUGGED_H */
+
+int MPIR_being_debugged = 0;
+
+void MPIR_Breakpoint ()
+{
+
+}
+
+int get_mpir_being_debugged ()
+{
+    return MPIR_being_debugged;
+}
+
+void set_mpir_being_debugged (int v)
+{
+    MPIR_being_debugged = v;
+}
 
 void * unpack_long(ptrdiff_t num){
   return (void*)num;
 }
 """,
-    libraries=["flux-core", "debugged", "flux"],
+    libraries=["flux-core"],
     library_dirs=[
-        f"{root}/src/common/.libs",
-        f"{root}/src/common/libdebugged/.libs",
-        f"{root}/src/common/libflux/.libs",
+        root,
+        f"{root}/lib",
+        f"{root}/lib/flux",
     ],
     include_dirs=[
         root,
-        f"{root}/src/include",
-        f"{root}/src/common/libflux",
-        f"{root}/src/common/libdebugged",
+        f"{root}/include",
+        f"{root}/include/flux",
     ],
     extra_compile_args=[
-        f"-L{root}/src/common/.libs",
-        f"-L{root}/src/common/libflux/.libs",
-        f"-L{root}/src/common/libdebugged/.libs",
+        f"-L{root}/lib",
+        f"-L{root}/lib/flux",
     ],
 )
 

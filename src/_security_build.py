@@ -5,14 +5,14 @@ import os
 # Ensure paths are in _flux
 here = os.path.abspath(os.path.dirname(__file__))
 
-source = os.environ.get("FLUX_SECURITY_SOURCE")
-includes = os.environ.get("FLUX_SECURITY_INCLUDE")
+source = os.environ.get("FLUX_INSTALL_ROOT")
+includes = os.path.join(source, "include")
+security_includes = os.path.join(source, "include", "flux", "security")
 
 preproc_file = os.path.join(here, "_security_preproc.h")
 core_c_file = os.path.join(here, "_security.c")
 
 ffi = FFI()
-
 
 ffi.set_source(
     "_flux._security",
@@ -21,33 +21,23 @@ ffi.set_source(
             """,
     libraries=[
         "flux-security",
-        "security",
         "munge",
         "json-glib-1.0",
         "util",
-        "tomlc99",
     ],
     library_dirs=[
+        source,
+        "/usr/lib",
         "/usr/local/lib",
         "/usr/lib/x86_64-linux-gnu",
-        f"{source}/src/libutil/.libs",
-        f"{source}/src/lib",
-        f"{source}/src/lib/.libs",
-        f"{source}/src/libtomlc99/.libs",
     ],
     include_dirs=[
-        "/usr/local/include",
-        f"{source}/src/lib",
-        f"{source}/src/libutil",
-        f"{source}/src/libtomlc99",
         includes,
+        security_includes,
     ],
     extra_compile_args=[
-        f"-L{source}/src/lib",
+        f"-L{source}/lib",
         "-L/usr/lib/x86_64-linux-gnu",
-        f"-L{source}/src/libutil/.libs",
-        f"-L{source}/src/lib/.libs",
-        f"-L{source}/src/libtomlc99/.libs",
     ],
 )
 
