@@ -25,7 +25,7 @@ from distutils.core import setup, Command
 
 # Metadata
 package_name = "flux-python"
-package_version = "0.48.0-rc2"
+package_version = "0.48.0-rc4"
 package_description = "Python bindings for the flux resource manager API"
 package_url = "https://github.com/flux-framework/flux-python"
 package_keywords = "flux, job manager, orchestration, hpc"
@@ -43,15 +43,19 @@ cffi_dep = "cffi>=1.1"
 root = os.path.dirname(os.path.abspath(__file__))
 source = os.path.join(root, "src")
 
+
 def find_flux():
     """
     Find flux install via the executable!
     """
-    path = shutil.which('flux')
+    path = shutil.which("flux")
     if not path:
-        sys.exit('Cannot find executable flux, which is required to be on PATH to find the install location.')
+        sys.exit(
+            "Cannot find executable flux, which is required to be on PATH to find the install location."
+        )
     # /usr/local/bin/flux --> /usr/local
     return os.path.dirname(os.path.dirname(path))
+
 
 flux_root = find_flux()
 
@@ -60,12 +64,11 @@ flux_root = find_flux()
 options = {
     "core": {
         "header": "include/flux/core.h",
-        "additional_headers": [os.path.join(source, "callbacks.h")]
+        "additional_headers": [os.path.join(source, "callbacks.h")],
     },
     "hostlist": {
         "header": "include/flux/hostlist.h",
     },
-
     # Note that rlist is currently disabled, so this
     # set of metadata doesn't matter
     "rlist": {
@@ -87,6 +90,7 @@ build_types = {"core", "idset", "security", "hostlist"}
 
 # rlist.h is disabled for now, as it requires the flux-core build
 # build_types = {"core", "idset", "rlist", "security", "hostlist"}
+
 
 @contextmanager
 def workdir(dirname):
@@ -161,7 +165,6 @@ class PrepareFluxHeaders:
             value = []
         setattr(self, attr, value)
 
-
     def run(self):
         """
         Run the install
@@ -196,7 +199,11 @@ class HeaderCleaner:
         self.header = kwargs["header"]
 
         # Update search to include defaults
-        custom_search = [os.path.join(self.root, "include"), os.path.join(self.root, "lib"), os.path.join(self.root, "include", "flux")]
+        custom_search = [
+            os.path.join(self.root, "include"),
+            os.path.join(self.root, "lib"),
+            os.path.join(self.root, "include", "flux"),
+        ]
         self.search = custom_search + [
             x.format(root=root) for x in kwargs.get("search", [])
         ]
@@ -254,14 +261,14 @@ class HeaderCleaner:
         if not gcc:
             sys.exit("Cannot find gcc compiler.")
         cmd = [
-              gcc,
-              "-E",
-              "-D __attribute__(...)=",
-              '-DFLUX_DEPRECATED(...)=',
-              self.output,
-              "-o",
-              self.preproc_output,
-          ]
+            gcc,
+            "-E",
+            "-D __attribute__(...)=",
+            "-DFLUX_DEPRECATED(...)=",
+            self.output,
+            "-o",
+            self.preproc_output,
+        ]
         print(" ".join(cmd))
         res = subprocess.call(cmd)
         if res != 0:
@@ -317,6 +324,7 @@ class HeaderCleaner:
         # Flag as checked
         self.checked_heads[f] = 1
 
+
 def setup():
     """
     A wrapper to run setup. This likely isn't best practice, but is a first effort.
@@ -330,14 +338,13 @@ def setup():
     # The flux security path should be in the same root, under includes
     security_include = os.path.join(flux_root, "include", "flux", "security")
     if not os.path.exists(security_include):
-        sys.exit(f'Cannot find flux security under expected path {security_include}')
+        sys.exit(f"Cannot find flux security under expected path {security_include}")
 
-    # We only want this to run on creating the tarball
+    # We only want this to run on creating the tarball or install
     command = sys.argv[1]
-    if command in ["sdist", "build", "build_ext"]:
-        # Custom setup commands, first without cffi to prepare headers
-        prepare = PrepareFluxHeaders(flux_root)
-        prepare.run()
+    print(f"Command is {command}")
+    prepare = PrepareFluxHeaders(flux_root)
+    prepare.run()
 
     # Request to install additional modules (we always do core0
     # We also have to remove the setup.py flags that aren't known

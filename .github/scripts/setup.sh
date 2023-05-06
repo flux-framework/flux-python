@@ -71,7 +71,8 @@ chmod +x etc/gen-cmdhelp.py
 ./autogen.sh || echo "No autogen here"
 ./configure --prefix=/usr/local
 make
-sudo make install
+# This sometimes fails the first time but then works ok? Weird
+sudo make install || true
 sudo make install
 sudo ldconfig   
 cd ${here}
