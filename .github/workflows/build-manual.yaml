@@ -47,18 +47,18 @@ jobs:
         sudo ldconfig
     
     - name: Prepare Wheel
-      if: (github.event != 'pull_request')
+      if: (github.event_name != 'pull_request')
       run: conda create --quiet --name env twine
 
     - name: Install dependencies
-      if: (github.event != 'pull_request')
+      if: (github.event_name != 'pull_request')
       run: |
         export PATH="/usr/share/miniconda/bin:$PATH"
         source activate env
         pip install setuptools wheel twine
 
     - name: Build and publish
-      if: (github.event != 'pull_request')
+      if: (github.event_name != 'pull_request')
       env:
         TWINE_USERNAME: ${{ secrets.PYPI_USER }}
         TWINE_PASSWORD: ${{ secrets.PYPI_PASS }}
