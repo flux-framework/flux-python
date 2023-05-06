@@ -3,8 +3,12 @@
 set -euo pipefail
 
 # This will be empty for nightly test, and we will clone master branch
-FLUX_VERSION=${FLUX_VERSION:-0.48.0}
-echo "Flux Version is ${FLUX_VERSION}"
+FLUX_RELEASE_VERSION=${FLUX_RELEASE_VERSION:-0.50.0}
+FLUX_VERSION=${FLUX_VERSION:-develop}
+
+# Prepare the version file
+echo "Flux Version for pypi is ${FLUX_VERSION}"
+sed -i "s/package_version = \"develop\"/package_version = \"$FLUX_VERSION\"/" setup.py
 
 here=$(pwd)
 sudo apt-get update
@@ -53,16 +57,12 @@ sudo make install
 sudo ldconfig
 
 # This is a build from a release 
-if [[ "${FLUX_VERSION}" != "" ]]; then
-    echo "Flux version requested to build is ${FLUX_VERSION}"
-    wget https://github.com/flux-framework/flux-core/releases/download/v${FLUX_VERSION}/flux-core-${FLUX_VERSION}.tar.gz
-    tar -xzvf flux-core-${FLUX_VERSION}.tar.gz
-    sudo mv flux-core-${FLUX_VERSION} /code
+echo "Flux Release Version is ${FLUX_RELEASE_VERSION}"
+echo "Flux version requested to build is ${FLUX_RELEASE_VERSION}"
+wget https://github.com/flux-framework/flux-core/releases/download/v${FLUX_RELEASE_VERSION}/flux-core-${FLUX_RELEASE_VERSION}.tar.gz
+tar -xzvf flux-core-${FLUX_RELEASE_VERSION}.tar.gz
+sudo mv flux-core-${FLUX_RELEASE_VERSION} /code
 
-# Build from the current master branch
-else
-    sudo git clone https://github.com/flux-framework/flux-core /code
-fi
 sudo chown -R $USER /code
 cd /code
 chmod +x etc/gen-cmdhelp.py
@@ -70,8 +70,12 @@ chmod +x etc/gen-cmdhelp.py
 # This is only needed for non-releases
 ./autogen.sh || echo "No autogen here"
 ./configure --prefix=/usr/local
-make
-sudo make install
+
+# We don't really care about the version here -just building python bindings
+make VERBOSE=1
+
+# This sometimes fails the first time but then works ok? Weird
+sudo make install || true
 sudo make install
 sudo ldconfig   
 cd ${here}
