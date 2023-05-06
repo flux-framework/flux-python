@@ -1,19 +1,17 @@
-name: build-manual flux-python
+name: build-legacy flux-python
 
 on:
+  pull_request: []
   workflow_dispatch:
     inputs:
       version:
         description: 'Pypi version'
-      release_version:
-        description: 'Version of flux to build'
-        default: "0.50.0"
       branch:
         description: 'Branch to build from'
-        default: "master"
+        default: "0.49.0"
       repo:
         description: 'Repository to build from'
-        default: "https://github.com/flux-framework/flux-core"
+        default: "https://github.com/rse-ops/flux-core-python"
 
 jobs:
   build-manual:
@@ -66,4 +64,3 @@ jobs:
         export PATH="/usr/share/miniconda/bin:$PATH"
         source activate env
         twine upload dist/*.tar.gz
-

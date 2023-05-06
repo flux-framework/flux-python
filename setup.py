@@ -25,10 +25,10 @@ from distutils.core import setup, Command
 
 # Metadata
 package_name = "flux-python"
-package_version = "0.48.0-rc4"
+package_version = "develop"
 package_description = "Python bindings for the flux resource manager API"
 package_url = "https://github.com/flux-framework/flux-python"
-package_keywords = "flux, job manager, orchestration, hpc"
+package_keywords = "flux, job manager, workload manager, orchestration, hpc"
 
 try:
     with open("README.md") as filey:
@@ -371,7 +371,7 @@ def setup():
         packages=find_packages(),
         include_package_data=True,
         zip_safe=False,
-        install_requires=[cffi_dep],
+        install_requires=[cffi_dep, "pyyaml"],
         extras_require={
             "dev": ["pyyaml", "jsonschema", "docutils", "black", "IPython"]
         },
