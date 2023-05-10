@@ -33,7 +33,10 @@ jobs:
       env:
         FLUX_BRANCH: ${{ inputs.branch }}
         FLUX_REPO: ${{ inputs.repo }}
+      shell: bash
       run: |
+        echo "Flux Repo: ${FLUX_REPO}"
+        echo "Flux Branch: ${FLUX_BRANCH}"
         if [[ "${FLUX_REPO}" == "" ]]; then
             FLUX_REPO="https://github.com/flux-framework/flux-core"
         fi
