@@ -22,8 +22,8 @@ sudo apt-get install -y \
         libjansson-dev \
         libmunge-dev \
         libncursesw5-dev \
-        lua5.4 \
-        liblua5.4-dev \
+        lua5.3 \
+        liblua5.3-dev \
         liblz4-dev \
         libsqlite3-dev \
         uuid-dev \
@@ -46,12 +46,12 @@ sudo rm -rf /var/lib/apt/lists/*
 
 sudo python3 -m pip install IPython
 sudo python3 -m pip install -r .github/scripts/requirements-dev.txt
-export LD_LIBRARY_PATH=/usr/local/lib:/usr/lib
+export LD_LIBRARY_PATH=/usr/lib:/usr/local/lib
 
 git clone https://github.com/flux-framework/flux-security ~/security
 cd ~/security
 ./autogen.sh
-./configure --prefix=/usr/local
+./configure --prefix=/usr
 make 
 sudo make install
 sudo ldconfig
@@ -63,13 +63,13 @@ wget https://github.com/flux-framework/flux-core/releases/download/v${FLUX_RELEA
 tar -xzvf flux-core-${FLUX_RELEASE_VERSION}.tar.gz
 sudo mv flux-core-${FLUX_RELEASE_VERSION} /code
 
-sudo chown -R $USER /code
+sudo chown -R $(id -u) /code
 cd /code
 chmod +x etc/gen-cmdhelp.py
 
 # This is only needed for non-releases
 ./autogen.sh || echo "No autogen here"
-./configure --prefix=/usr/local
+./configure --prefix=/usr
 
 # We don't really care about the version here -just building python bindings
 make VERBOSE=1

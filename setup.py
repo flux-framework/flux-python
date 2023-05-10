@@ -384,7 +384,10 @@ def setup():
             "Topic :: Software Development",
             "Topic :: Scientific/Engineering",
             "Operating System :: Unix",
+            "Programming Language :: Python :: 3.6",
+            "Programming Language :: Python :: 3.7",
             "Programming Language :: Python :: 3.8",
+            "Programming Language :: Python :: 3.9",
         ],
         cffi_modules=cffi_modules,
     )

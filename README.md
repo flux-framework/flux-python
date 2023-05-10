@@ -12,7 +12,7 @@ to you:
  - ⭐️ [Flux Framework Documentation](https://flux-framework.readthedocs.io)
  - ⭐️ [Flux Projects](https://flux-framework.org)
  - ⭐️ [Tutorials](https://flux-framework.readthedocs.io/en/latest/tutorials/index.html)
- 
+ - ⭐️ [Installing Flux Python on an LLNL System](https://github.com/flux-framework/flux-python/blob/main/LLNL.md) 
  
 ## Development
 
@@ -35,13 +35,18 @@ make
 sudo make install
 ```
 
-And then copy over the Python source to "flux" and build your custom wheel:
+And then copy over the Python source to "flux" and build your custom archives and/or wheels:
 
 ```bash
 $ rm -rf /workspaces/flux-python/flux
 $ cp -R src/bindings/python/flux /workspaces/flux-python/flux
 $ cd /workspaces/flux-python
+# Archive
 $ python3 setup.py sdist
+
+# Wheel (will build for the python version you've targeted)
+# This isn't currently being done but is a future TODO!
+$ python3 setup.py sdist bdist_wheel
 ```
 
 And if you want to upload:

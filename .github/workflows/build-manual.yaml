@@ -18,9 +18,8 @@ on:
 jobs:
   build-manual:
     runs-on: ubuntu-latest
-    services:
-      api:
-        image: fluxrm/testenv:focal
+    container:
+      image: fluxrm/testenv:focal
     steps:
     - uses: actions/checkout@v3
 
@@ -34,7 +33,10 @@ jobs:
       env:
         FLUX_BRANCH: ${{ inputs.branch }}
         FLUX_REPO: ${{ inputs.repo }}
+      shell: bash
       run: |
+        echo "Flux Repo: ${FLUX_REPO}"
+        echo "Flux Branch: ${FLUX_BRANCH}"
         if [[ "${FLUX_REPO}" == "" ]]; then
             FLUX_REPO="https://github.com/flux-framework/flux-core"
         fi
