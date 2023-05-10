@@ -131,11 +131,17 @@ pip install flux-python==0.49.0rc0
 # In your flux instance make sure to export PYTHONPATH to your environment
 export PYTHONPATH=~/.local/lib/python3.9/site-packages
 
-# Python 3.9.x
+# Python 3.10.x
 $ module load python/3.10.8
 pip install flux-python==0.48.0rc6
 # In your flux instance make sure to export PYTHONPATH to your environment
 export PYTHONPATH=~/.local/lib/python3.10/site-packages
+
+# Python cray-python
+$ module load cray-python
+pip install flux-python==0.48.0rc6
+# In your flux instance make sure to export PYTHONPATH to your environment
+export PYTHONPATH=~/.local/lib/python3.9/site-packages
 ```
 
 For any of the approaches above, there seems to be some kind of cluster cache. If you have trouble with the cache
