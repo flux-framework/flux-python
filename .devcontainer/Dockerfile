@@ -20,11 +20,11 @@ RUN apt-get update && \
     python3 -m pip install IPython && \
     python3 -m pip install -r /requirements.txt
 
-# Assuming installing to /usr/local
-ENV LD_LIBRARY_PATH=/usr/local/lib
+# Assuming installing to /usr
+ENV LD_LIBRARY_PATH=/usr/lib
 
-# Assuming installing to /usr/local
-ENV LD_LIBRARY_PATH=/usr/local/lib
+# Assuming installing to /usr
+ENV LD_LIBRARY_PATH=/usr/lib
 
 # extra interactive utilities and compilation_database generation
 RUN apt-get update \
@@ -50,14 +50,14 @@ USER $USERNAME
 RUN git clone https://github.com/flux-framework/flux-core ~/flux-core && \
     cd ~/flux-core && \
     ./autogen.sh && \
-    ./configure --prefix=/usr/local && \
+    ./configure --prefix=/usr && \
     make && \
     sudo make install
     
 RUN git clone https://github.com/flux-framework/flux-security ~/security && \
     cd ~/security && \
     ./autogen.sh && \    
-    ./configure --prefix=/usr/local && \
+    ./configure --prefix=/usr && \
     make && \
     sudo make install && \
     sudo ldconfig

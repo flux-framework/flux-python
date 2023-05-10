@@ -16,9 +16,8 @@ on:
 jobs:
   build-manual:
     runs-on: ubuntu-latest
-    services:
-      api:
-        image: fluxrm/testenv:focal
+    container:
+      image: fluxrm/testenv:focal
     steps:
     - uses: actions/checkout@v3
 
