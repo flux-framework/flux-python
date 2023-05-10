@@ -1,4 +1,4 @@
-pythoname: build-legacy flux-python
+name: build-legacy flux-python
 
 on:
   pull_request: []
