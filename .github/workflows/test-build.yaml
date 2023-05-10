@@ -8,7 +8,7 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
-    containers:
+    container:
       image: fluxrm/testenv:focal
     steps:
     - uses: actions/checkout@v3
