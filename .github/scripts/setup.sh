@@ -22,8 +22,8 @@ sudo apt-get install -y \
         libjansson-dev \
         libmunge-dev \
         libncursesw5-dev \
-        lua5.4 \
-        liblua5.4-dev \
+        lua5.3 \
+        liblua5.3-dev \
         liblz4-dev \
         libsqlite3-dev \
         uuid-dev \
