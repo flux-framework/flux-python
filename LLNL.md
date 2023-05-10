@@ -53,8 +53,6 @@ And then find the pypi package of the same version from [here](https://pypi.org/
 And then ensure that your python of interest is active on the path, and you've created a virtual environment
 (that will have pip) that you can install to. Here is a very "hard coded" way to go about it. Most likely
 you would just add your Python of interest to your `PATH` but here we are targeting the binary directly.
-Also note that (sometimes) you can install a slight variation of version (e.g., here we are installing 0.48.0 to 0.49.0,
-and this is possible because the Flux Python interfaces didn't change.
 
 ```bash
 # Python 3.10
@@ -62,7 +60,7 @@ and this is possible because the Flux Python interfaces didn't change.
 source ./python310env/bin/activate
 # ~/test/python310env/bin/python
 # ~/test/python310env/bin/pip
-pip install flux-python==0.48.0rc6
+pip install flux-python==0.49.0rc1
 # In your flux instance make sure to export PYTHONPATH to your environment
 export PYTHONPATH=~/test/python310env/lib/python3.10/site-packages
 
@@ -71,7 +69,7 @@ export PYTHONPATH=~/test/python310env/lib/python3.10/site-packages
 source ./python39env/bin/activate
 # ~/test/python39env/bin/python
 # ~/test/python39env/bin/pip
-pip install flux-python==0.48.0rc6
+pip install flux-python==0.49.0rc1
 # In your flux instance make sure to export PYTHONPATH to your environment
 export PYTHONPATH=~/test/python39env/lib/python3.9/site-packages
 ```
@@ -123,6 +121,10 @@ build-options:          +ascii-only+hwloc==2.8.0+zmq==4.3.4
 And then find the pypi package of the same version from [here](https://pypi.org/project/flux-python/).
 And then ensure that your python of interest is loaded as a module. Note that these python modules
 also come with pip, so we don't need to make an environment to get it. Yay!
+
+Also note that (sometimes) you can install a slight variation of version (e.g., here we are installing 0.48.0 to 0.49.0,
+and this is possible because the Flux Python interfaces didn't change.
+
 
 ```bash
 # Python 3.9.x
