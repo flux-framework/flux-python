@@ -4,6 +4,9 @@ on:
   pull_request: []
   workflow_dispatch:
     inputs:
+      branch:
+        description: 'Branch to build from'
+        default: "master"
       rc:
         description: 'Release candiate to target for wheels'
         default: "0"
@@ -12,7 +15,7 @@ on:
         default: "https://github.com/rse-ops/flux-core-python"
 
 jobs:
-  build-manual:
+  build-legacy-wheels:
     runs-on: ubuntu-latest
     container:
       image: fluxrm/testenv:focal
@@ -29,25 +32,19 @@ jobs:
       env:
         FLUX_BRANCH: ${{ inputs.branch }}
         FLUX_REPO: ${{ inputs.repo }}
+
       run: |
         git clone -b ${FLUX_BRANCH} ${FLUX_REPO} /tmp/flux-core  || git clone https://github.com/flux-framework/flux-core /tmp/flux-core
         mv /tmp/flux-core/src/bindings/python/flux ./flux
         python3 setup.py sdist
         sudo ldconfig
 
-    - uses: RalfG/python-wheels-manylinux-build@v0.7.1-manylinux2010_x86_64
-      with:
-        python-versions: 'cp36-cp36 cp37-cp37 cp38-cp38 cp39-cp39 cp310-cp310'
-        # build-requirements: 'cython numpy'
-        # system-packages: 'lrzip-devel zlib-devel'
-        # pre-build-command: 'sh pre-build-script.sh'
-        # package-path: 'my_project'
-        #pip-wheel-args: '-w ./dist --no-deps'
-
     - name: Build Python Wheels
+      env:
+        build_number: ${{ inputs.rc }}
       run: |
         /bin/bash ./docker/install-mamba.sh
-        /bin/bash ./docker/build-wheels.sh
+        /bin/bash ./docker/build-wheels.sh ${build_number}
 
     - name: Install dependencies
       if: (github.event_name != 'pull_request')

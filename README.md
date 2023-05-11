@@ -56,7 +56,8 @@ You can build versions of the Python wheels across 3.6 to 3.10 like:
 /bin/bash ./docker/install-mamba.sh
 
 # And this to install the current Flux + version in setup.py as a wheel
-/bin/bash ./docker/build-wheels.sh
+# The number is the build number
+/bin/bash ./docker/build-wheels.sh 2
 ```
 
 And if you want to upload:

@@ -8,6 +8,9 @@ on:
       release_version:
         description: 'Version of flux to build'
         default: "0.50.0"
+      rc:
+        description: 'Release candidate to build (for wheel)'
+        default: "0"
       branch:
         description: 'Branch to build from'
         default: "master"
@@ -49,10 +52,12 @@ jobs:
         sudo ldconfig
 
     - name: Build Python Wheels
+      env:
+        build_number: ${{ inputs.rc }}
       run: |
         /bin/bash ./docker/install-mamba.sh
-        /bin/bash ./docker/build-wheels.sh
-    
+        /bin/bash ./docker/build-wheels.sh ${build_number}
+
     - name: Install dependencies
       if: (github.event_name != 'pull_request')
       run: python3 -m pip install setuptools wheel twine

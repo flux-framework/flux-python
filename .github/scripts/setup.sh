@@ -46,12 +46,12 @@ sudo rm -rf /var/lib/apt/lists/*
 
 sudo python3 -m pip install IPython
 sudo python3 -m pip install -r .github/scripts/requirements-dev.txt
-export LD_LIBRARY_PATH=/usr/lib:/usr/local/lib
+export LD_LIBRARY_PATH=/usr/local/lib:/usr/lib
 
 git clone https://github.com/flux-framework/flux-security ~/security
 cd ~/security
 ./autogen.sh
-./configure --prefix=/usr
+./configure --prefix=/usr/local
 make 
 sudo make install
 sudo ldconfig
@@ -69,7 +69,7 @@ chmod +x etc/gen-cmdhelp.py
 
 # This is only needed for non-releases
 ./autogen.sh || echo "No autogen here"
-./configure --prefix=/usr
+./configure --prefix=/usr/local
 
 # We don't really care about the version here -just building python bindings
 make VERBOSE=1
