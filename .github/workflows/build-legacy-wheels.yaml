@@ -44,7 +44,7 @@ jobs:
         # build-requirements: 'cython numpy'
         # system-packages: 'lrzip-devel zlib-devel'
         pre-build-command: |
-          git clone -b ${FLUX_BRANCH} ${FLUX_REPO} /tmp/flux-core  || git clone https://github.com/flux-framework/flux-core /tmp/flux-core
+          git clone https://github.com/flux-framework/flux-core /tmp/flux-core
           mv /tmp/flux-core/src/bindings/python/flux ./flux
 
         # package-path: 'my_project'
