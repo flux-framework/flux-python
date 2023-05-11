@@ -69,7 +69,13 @@ $ twine upload dist/*.tar.gz
 ## Install on a System
 
 Since we need to link to Flux libraries, you are advised to install flux and flux-security in the same location
-that will be discovered via the executable "flux," so typically `/usr` or `/usr/local`. You can do either:
+that will be discovered via the executable "flux," so typically `/usr` or `/usr/local`. You will need `wheel` installed:
+
+```bash
+$ pip install wheel
+```
+
+You can do either:
 
 ```bash
 # Find the flux version on your system

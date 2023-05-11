@@ -2,13 +2,19 @@
 
 > 🐍️ You called me?
 
-**Important** these bindings are under development, and we are still working on automation
-and improvement! If you run into an issue, please [let us know](https://github.com/flux-framework/flux-python/issues) 
-so that we can fix. 
-
 Are you looking for specific instructions for your system at LLNL? You've
 come to the right place! If your Python install or system is missing from here,
 please [let us know](https://github.com/flux-framework/flux-python/issues).
+
+**Important** these bindings are under development, and we are still working on automation
+and improvement! If you run into an issue, please [let us know](https://github.com/flux-framework/flux-python/issues) 
+so that we can fix. For our wheels (under development) you will need `wheel` installed:
+
+```bash
+$ pip install wheel
+```
+
+And if it fails, it should fall back to the install from source.
 
 ## How does it work?
 
