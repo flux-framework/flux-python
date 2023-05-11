@@ -10,17 +10,16 @@ ls
 FLUX_REPO=$(cat ./flux-repo)
 FLUX_BRANCH=$(cat ./flux-branch)
 FLUX_RELEASE_VERSION=$(cat ./flux-release-version)
+
 echo "repo: $FLUX_REPO"
 echo "branch: $FLUX_BRANCH"
 echo "release: $FLUX_RELEASE_VERSION"
 
-git clone https://github.com/flux-framework/flux-core /tmp/flux-core
+git clone -b ${FLUX_BRANCH} ${FLUX_REPO} /tmp/flux-core || git clone https://github.com/flux-framework/flux-core /tmp/flux-core
 mv /tmp/flux-core/src/bindings/python/flux ./flux
 export FLUX_REPO FLUX_BRANCH FLUX_RELEASE_VERSION
 
 yum -y update \
- && yum -y install 'dnf-command(config-manager)' \
- && yum -y update \
  && yum -y install epel-release \
  && yum -y install \
 	wget \
