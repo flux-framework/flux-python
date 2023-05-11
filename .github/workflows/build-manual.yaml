@@ -47,6 +47,11 @@ jobs:
         mv /tmp/flux-core/src/bindings/python/flux ./flux
         python3 setup.py sdist
         sudo ldconfig
+
+    - name: Build Python Wheels
+      run: |
+        /bin/bash ./docker/install-mamba.sh
+        /bin/bash ./docker/build-wheels.sh
     
     - name: Install dependencies
       if: (github.event_name != 'pull_request')
