@@ -7,4 +7,4 @@ chmod +x ./mambaforge.sh
 sudo bash mambaforge.sh -b -p /opt/conda
 rm mambaforge.sh
 /opt/conda/bin/pip install --upgrade --ignore-installed coverage cffi ply six pyyaml jsonschema
-sudo chown -R vscode /opt/conda
+sudo chown -R $(id -u) /opt/conda
