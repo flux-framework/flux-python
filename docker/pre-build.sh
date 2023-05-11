@@ -61,6 +61,7 @@ yum -y update \
 	python3-yaml \
 	python3-jsonschema \
 	python3-sphinx \
+	libsodium \
 	libsodium-devel \
         libyaml-devel \
         libgomp \
@@ -95,6 +96,7 @@ yum -y update \
 	hwloc \
  && yum clean all
 
+ldconfig
 ln -fs /usr/local/bin/python3.8 /usr/bin/python3
 printf "LANG=C.UTF-8" > /etc/locale.conf
 
