@@ -14,7 +14,7 @@ on:
         default: "https://github.com/rse-ops/flux-core-python"
 
 jobs:
-  build-manual:
+  build-legacy:
     runs-on: ubuntu-latest
     container:
       image: fluxrm/testenv:focal

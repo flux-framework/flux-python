@@ -24,13 +24,13 @@ If you want to build a custom version with Flux core you can do:
 
 ```bash
 rm -rf ~/flux-core
-export FLUX_VERSION=0.48.0
+export FLUX_VERSION=0.49.0
 wget https://github.com/flux-framework/flux-core/releases/download/v${FLUX_VERSION}/flux-core-${FLUX_VERSION}.tar.gz
 tar -xzvf flux-core-${FLUX_VERSION}.tar.gz
 sudo mv flux-core-${FLUX_VERSION} ~/flux-core
 rm flux-core-${FLUX_VERSION}.tar.gz
 cd ~/flux-core
-./configure --prefix=/usr/local
+./configure --prefix=/usr
 make
 sudo make install
 ```
@@ -49,6 +49,17 @@ $ python3 setup.py sdist
 $ python3 setup.py sdist bdist_wheel
 ```
 
+You can build versions of the Python wheels across 3.6 to 3.10 like:
+
+```bash
+# only need to run this once in the container
+/bin/bash ./docker/install-mamba.sh
+
+# And this to install the current Flux + version in setup.py as a wheel
+# The number is the build number
+/bin/bash ./docker/build-wheels.sh 2
+```
+
 And if you want to upload:
 
 ```bash
@@ -58,7 +69,13 @@ $ twine upload dist/*.tar.gz
 ## Install on a System
 
 Since we need to link to Flux libraries, you are advised to install flux and flux-security in the same location
-that will be discovered via the executable "flux," so typically `/usr` or `/usr/local`. You can do either:
+that will be discovered via the executable "flux," so typically `/usr` or `/usr/local`. You will need `wheel` installed:
+
+```bash
+$ pip install wheel
+```
+
+You can do either:
 
 ```bash
 # Find the flux version on your system
@@ -82,39 +99,13 @@ If you install to a local (personal) location (e.g., `$HOME/.local`) you'll need
 export PYTHONPATH=$HOME/.local/lib/python3.7/site-packages
 ```
 
-### Building Modules
-
-We will need to build the tarball providing paths to the flux-core and flux-security
-sources. This can be improved upon to just be one path if all the dependencies
-are provided with the flux install (and we don't need the source). Note
-that we also provide a custom version for the pypi package:
-
-```bash
-# Generate the wheel (requires pip install wheel)
-$ python3 setup.py sdist bdist_wheel --flux-root /home/vscode/flux-core --security-src /home/vscode/security --security-include /usr/local/include/flux/security --version 0.46.0-rc-0
-```
-
-You can then install the wheel (as a user or to the root)
-
-```bash
-$ pip install dist/flux-0.46.0-cp38-cp38-linux_x86_64.whl --user
-$ sudo pip install dist/flux-0.46.0-cp38-cp38-linux_x86_64.whl 
-```
-```console
-Processing ./dist/flux-0.46.0-cp38-cp38-linux_x86_64.whl
-Requirement already satisfied: cffi>=1.1 in /usr/lib/python3/dist-packages (from flux==0.46.0) (1.14.0)
-Installing collected packages: flux
-Successfully installed flux-0.46.0
-```
-
-If the development container you are using still installs the Python bindings, you'll want to do the sudo variant above to override.
-And then start a flux instance:
+You can then do some basic testing.
 
 ```bash
 $ flux start --test-size=4
 ```
 
-And import flux.
+**Ensure your PYTHONPATH is correct here** And import flux.
 
 ```bash
 $ ipython
@@ -143,15 +134,6 @@ $ python .github/scripts/check_releases.py flux-framework --version 0.46.0
 
 That basically checks if there should be a build. It will use the container provided
 here to install a custom version of flux core that builds the release.
-
-### Work in Progress
-
-@vsoch wants to try installing her test releases to a system somewhere, and figure
-out this issue with buidling a wheel (or maybe we don't want wheels after all):
-
-> HTTPError: 400 Bad Request from https://upload.pypi.org/legacy/        
->         Binary wheel 'flux_python-0.46.0rc0-cp38-cp38-linux_x86_64.whl' has an 
->         unsupported platform tag 'linux_x86_64'. 
 
 #### Release
 

@@ -4,7 +4,7 @@ set -euo pipefail
 
 # This will be empty for nightly test, and we will clone master branch
 FLUX_RELEASE_VERSION=${FLUX_RELEASE_VERSION:-0.50.0}
-FLUX_VERSION=${FLUX_VERSION:-develop}
+FLUX_VERSION=${FLUX_VERSION:-0.50.0}
 
 # Prepare the version file
 echo "Flux Version for pypi is ${FLUX_VERSION}"
@@ -15,6 +15,7 @@ sudo apt-get update
 sudo apt-get install -y \
         libjson-glib-dev \
         wget \
+        curl \
         automake \
         libsodium-dev \
         libzmq3-dev \
@@ -46,12 +47,12 @@ sudo rm -rf /var/lib/apt/lists/*
 
 sudo python3 -m pip install IPython
 sudo python3 -m pip install -r .github/scripts/requirements-dev.txt
-export LD_LIBRARY_PATH=/usr/lib:/usr/local/lib
+export LD_LIBRARY_PATH=/usr/local/lib:/usr/lib
 
 git clone https://github.com/flux-framework/flux-security ~/security
 cd ~/security
 ./autogen.sh
-./configure --prefix=/usr
+./configure --prefix=/usr/local
 make 
 sudo make install
 sudo ldconfig
@@ -69,7 +70,7 @@ chmod +x etc/gen-cmdhelp.py
 
 # This is only needed for non-releases
 ./autogen.sh || echo "No autogen here"
-./configure --prefix=/usr
+./configure --prefix=/usr/local
 
 # We don't really care about the version here -just building python bindings
 make VERBOSE=1
