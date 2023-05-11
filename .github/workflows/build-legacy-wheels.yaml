@@ -19,26 +19,17 @@ jobs:
     steps:
     - uses: actions/checkout@v3
 
-    - name: Build Flux Core Branch
+    - name: Prepare Versions
       env:
         FLUX_RELEASE_VERSION: ${{ inputs.release_version }}
-        FLUX_VERSION: ${{ inputs.version }}
-      run: /bin/bash .github/scripts/setup.sh
-
-    - name: Build Python Bindings
-      env:
         FLUX_BRANCH: ${{ inputs.branch }}
         FLUX_REPO: ${{ inputs.repo }}
       run: |
-        git clone -b ${FLUX_BRANCH} ${FLUX_REPO} /tmp/flux-core  || git clone https://github.com/flux-framework/flux-core /tmp/flux-core
-        mv /tmp/flux-core/src/bindings/python/flux ./flux
-        python3 setup.py sdist
-        sudo ldconfig
+        echo ${FLUX_RELEASE_VERSION} > ./flux-release-version
+        echo ${FLUX_BRANCH} > ./flux-branch
+        echo ${FLUX_REPO} > ./flux-repo
 
     - uses: RalfG/python-wheels-manylinux-build@v0.7.1-manylinux2010_x86_64
-      env:
-        FLUX_BRANCH: ${{ inputs.branch }}
-        FLUX_REPO: ${{ inputs.repo }}
       with:
         python-versions: 'cp37-cp37m cp38-cp38 cp39-cp39 cp310-cp310 cp311-cp311' 
         # build-requirements: 'cython numpy'
