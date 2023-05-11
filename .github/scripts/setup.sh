@@ -15,6 +15,7 @@ sudo apt-get update
 sudo apt-get install -y \
         libjson-glib-dev \
         wget \
+        curl \
         automake \
         libsodium-dev \
         libzmq3-dev \
