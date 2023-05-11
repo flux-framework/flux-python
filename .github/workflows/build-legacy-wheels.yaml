@@ -43,7 +43,7 @@ jobs:
         python-versions: 'cp37-cp37m cp38-cp38 cp39-cp39 cp310-cp310 cp311-cp311' 
         # build-requirements: 'cython numpy'
         # system-packages: 'lrzip-devel zlib-devel'
-        pre-build-command: ./bin/bash ./docker/pre-build.sh
+        pre-build-command: sh ./docker/pre-build.sh
         # package-path: 'my_project'
         #pip-wheel-args: '-w ./dist --no-deps'
 
