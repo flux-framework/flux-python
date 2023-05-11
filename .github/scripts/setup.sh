@@ -4,7 +4,7 @@ set -euo pipefail
 
 # This will be empty for nightly test, and we will clone master branch
 FLUX_RELEASE_VERSION=${FLUX_RELEASE_VERSION:-0.50.0}
-FLUX_VERSION=${FLUX_VERSION:-develop}
+FLUX_VERSION=${FLUX_VERSION:-0.50.0}
 
 # Prepare the version file
 echo "Flux Version for pypi is ${FLUX_VERSION}"
