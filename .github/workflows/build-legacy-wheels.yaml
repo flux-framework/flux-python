@@ -1,4 +1,4 @@
-name: build-legacy flux-python
+name: build-legacy-wheels flux-python
 
 on:
   pull_request: []
