@@ -14,6 +14,78 @@ to you:
  - ⭐️ [Tutorials](https://flux-framework.readthedocs.io/en/latest/tutorials/index.html)
  - ⭐️ [Installing Flux Python on an LLNL System](https://github.com/flux-framework/flux-python/blob/main/LLNL.md) 
  
+
+## Helper Install
+
+If you don't want to figure out your flux version and install with pip directory (per instructions in [manual install](#manual-install))
+we provide a helper script [install-flux-python.sh](script/install-flux-python.sh) that will:
+
+1. Determine that Flux and Python are installed with pip
+2. Parse the version of Flux on your PATH
+3. Derive the version and run the command for you!
+
+You'll first want to make sure that flux is on your path, as is a `python3` executable with pip installed
+as a module alongside it. And you can run it as follows:
+
+```bash
+wget https://raw.githubusercontent.com/flux-framework/flux-python/main/script/install-flux-python.sh
+chmod +x ./install-flux-python.sh
+./install-flux-python.sh
+```
+
+If a version is missing on pypi or you otherwise have a bug, please open an issue here.
+
+## Manual Install
+
+Since we need to link to Flux libraries, you are advised to install flux and flux-security in the same location
+that will be discovered via the executable "flux," so typically `/usr` or `/usr/local`. You will need `wheel` installed:
+
+```bash
+$ pip install wheel
+```
+
+You can do either:
+
+```bash
+# Find the flux version on your system
+flux --version
+
+# Install the bindings that match that version
+pip install flux-python==0.48.0
+```
+
+And if you are having trouble with the WCI cache, you can also wget the [file directly from pypi](https://pypi.org/project/flux-python/#history)
+and install the .tar.gz directly.
+
+```bash
+wget https://files.pythonhosted.org/packages/25/fb/02951d80e44a19db291f0e7370d4e7d82c0c1b17709a37913881f958dff7/flux-python-0.48.0rc0.tar.gz
+pip install flux-python-0.48.0rc0.tar.gz
+```
+
+If you install to a local (personal) location (e.g., `$HOME/.local`) you'll need to add this to your `PYTHONPATH`
+
+```bash
+# The directory "flux" is under the site-packages here
+export PYTHONPATH=$HOME/.local/lib/python3.7/site-packages
+```
+
+You can then do some basic testing.
+
+```bash
+$ flux start --test-size=4
+```
+
+**Ensure your PYTHONPATH is correct here** And import flux.
+
+```bash
+$ ipython
+```
+```python
+import flux
+flux.Flux()
+```
+ 
+ 
 ## Development
 
 We provide a [.devcontainer](https://github.com/flux-framework/flux-python/tree/main/.devcontainer) environment you can open in VSCode
@@ -66,54 +138,6 @@ And if you want to upload:
 $ twine upload dist/*.tar.gz
 ```
 
-## Install on a System
-
-Since we need to link to Flux libraries, you are advised to install flux and flux-security in the same location
-that will be discovered via the executable "flux," so typically `/usr` or `/usr/local`. You will need `wheel` installed:
-
-```bash
-$ pip install wheel
-```
-
-You can do either:
-
-```bash
-# Find the flux version on your system
-flux --version
-
-# Install the bindings that match that version
-pip install flux-python==0.48.0
-```
-And if you are having trouble with the WCI cache, you can also wget the [file directly from pypi]()
-and install the .tar.gz directly.
-
-```bash
-wget https://files.pythonhosted.org/packages/25/fb/02951d80e44a19db291f0e7370d4e7d82c0c1b17709a37913881f958dff7/flux-python-0.48.0rc0.tar.gz
-pip install flux-python-0.48.0rc0.tar.gz
-```
-
-If you install to a local (personal) location (e.g., `$HOME/.local`) you'll need to add this to your `PYTHONPATH`
-
-```bash
-# The directory "flux" is under the site-packages here
-export PYTHONPATH=$HOME/.local/lib/python3.7/site-packages
-```
-
-You can then do some basic testing.
-
-```bash
-$ flux start --test-size=4
-```
-
-**Ensure your PYTHONPATH is correct here** And import flux.
-
-```bash
-$ ipython
-```
-```python
-import flux
-flux.Flux()
-```
 
 ### Automation
 
