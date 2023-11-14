@@ -170,6 +170,8 @@ class PrepareFluxHeaders:
         Run the install
         """
         for build_type in build_types:
+            if build_type == "security" and not has_flux_security:
+                continue
             cleaner = HeaderCleaner(
                 self.flux_root,
                 build_type=build_type,
@@ -331,14 +333,17 @@ def setup():
     """
     global flux_root
     global security_include
+    global has_flux_security
 
     # Always set the install root to the environment
     set_envar("FLUX_INSTALL_ROOT", flux_root)
 
     # The flux security path should be in the same root, under includes
     security_include = os.path.join(flux_root, "include", "flux", "security")
+    has_flux_security = True
     if not os.path.exists(security_include):
-        sys.exit(f"Cannot find flux security under expected path {security_include}")
+        print(f"Cannot find flux security under expected path {security_include}")
+        has_flux_security = False
 
     # We only want this to run on creating the tarball or install
     command = sys.argv[1]
@@ -350,6 +355,9 @@ def setup():
     # We also have to remove the setup.py flags that aren't known
     cffi_modules = ["src/_core_build.py:ffi"]
     for build_type in build_types:
+        # If we don't have flux security
+        if build_type == "security" and not has_flux_security:
+            continue
         # We always include / require core (may not be necessary)
         if build_type == "core":
             continue
