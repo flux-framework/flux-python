@@ -24,7 +24,7 @@ jobs:
     container:
       image: fluxrm/testenv:focal
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
 
     - name: Build Flux Core Branch
       env:
@@ -69,5 +69,5 @@ jobs:
         TWINE_PASSWORD: ${{ secrets.PYPI_PASS }}
       run: |
         ls dist/
-        twine upload --skip-existing dist/*.tar.gz
+        twine upload --skip-existing dist/flux_python*
 
