@@ -1,7 +1,7 @@
 name: build-legacy-wheels flux-python
 
 on:
-  pull_request: []
+  # pull_request: []
   workflow_dispatch:
     inputs:
       branch:
