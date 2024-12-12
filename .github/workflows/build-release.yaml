@@ -1,4 +1,4 @@
-name: build-manual flux-python
+name: build flux-python
 
 on:
   pull_request: []
@@ -25,11 +25,17 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        tag: ["focal", "bionic", "jammy", "noble"]
+        python: ["3.8", "3.9", "3.10", "3.11"]
     container:
-      image: fluxrm/testenv:${{ matrix.tag }}
+      image: fluxrm/testenv:jammy
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
+    - name: Setup Python
+      env:
+        python_version: ${{ matrix.python }}
+      # Installs to /opt/conda/envs/build/bin/python3
+      run: /bin/bash ./docker/install-mamba.sh ${python_version}
+
     - name: Build Flux Core Branch
       env:
         FLUX_RELEASE_VERSION: ${{ inputs.release_version }}
@@ -52,54 +58,41 @@ jobs:
         fi
         git clone -b ${FLUX_BRANCH} ${FLUX_REPO} /tmp/flux-core   
         mv /tmp/flux-core/src/bindings/python/flux ./flux
-        python3 setup.py sdist
+        /opt/conda/envs/build/bin/python3 setup.py sdist
         sudo ldconfig
 
     - name: Build Python Wheels
       env:
         build_number: ${{ inputs.rc }}
+        python_version: ${{ matrix.python }}
       run: |
-        /bin/bash ./docker/install-mamba.sh
-        /bin/bash ./docker/build-wheels.sh ${build_number}
-        echo "Builds for ${{ matrix.tag }}"
+        /bin/bash ./docker/build-wheels.sh ${build_number} ${python_version}
         ls ./dist
 
     - name: Upload distributions
       if: success()
       uses: actions/upload-artifact@v4
       with:
-        name: ${{ matrix.tag }}
+        name: ${{ matrix.python }}
         path: ./dist
 
   upload:
     runs-on: ubuntu-latest
     needs: [build-manual]
     steps:
-    - name: Download Focal
+    - name: Download Artifacts
       uses: actions/download-artifact@v4
-      with:
-        name: focal
-
-    - name: Download Bionic
-      uses: actions/download-artifact@v4
-      with:
-        name: bionic
-
-    - name: Download Jammy
-      uses: actions/download-artifact@v4
-      with:
-        name: jammy
-
-    - name: Download Noble
-      uses: actions/download-artifact@v4
-      with:
-        name: noble
+      # If name unspecified, all artifacts download for run
 
     - name: Show Files
       run: |
-        ls
+        ls */
+        # We just need one of these
+        first_dir=$(ls . | head -n 1)
         mkdir -p ./dist
-        mv * ./dist
+        mv */*.whl ./dist/
+        cp ${first_dir}/*.tar.gz ./dist/
+        ls ./dist
 
     - name: Build and publish
       if: (github.event_name != 'pull_request')
