@@ -92,6 +92,8 @@ jobs:
         mkdir -p ./dist
         mv */*.whl ./dist/
         cp ${first_dir}/*.tar.gz ./dist/
+        echo
+        echo "Files to distribute:"
         ls ./dist
 
     - name: Build and publish
@@ -101,4 +103,5 @@ jobs:
         TWINE_PASSWORD: ${{ secrets.PYPI_PASS }}
       run: |
         ls dist/
+        python3 -m pip install setuptools wheel twine
         twine upload --skip-existing dist/flux_python*
