@@ -1,0 +1,104 @@
+name: build flux-python
+
+on:
+  pull_request: []
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Pypi version'
+      release_version:
+        description: 'Version of flux to build'
+        default: "0.68.0"
+      rc:
+        description: 'Release candidate to build (for wheel)'
+        default: "0"
+      branch:
+        description: 'Branch to build from'
+        default: "master"
+      repo:
+        description: 'Repository to build from'
+        default: "https://github.com/flux-framework/flux-core"
+
+jobs:
+  build-manual:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python: ["3.8", "3.9", "3.10", "3.11"]
+    container:
+      image: fluxrm/testenv:jammy
+    steps:
+    - uses: actions/checkout@v4
+    - name: Setup Python
+      env:
+        python_version: ${{ matrix.python }}
+      # Installs to /opt/conda/envs/build/bin/python3
+      run: /bin/bash ./docker/install-mamba.sh ${python_version}
+
+    - name: Build Flux Core Branch
+      env:
+        FLUX_RELEASE_VERSION: ${{ inputs.release_version }}
+        FLUX_VERSION: ${{ inputs.version }}
+      run: /bin/bash .github/scripts/setup.sh
+
+    - name: Build Python Bindings
+      env:
+        FLUX_BRANCH: ${{ inputs.branch }}
+        FLUX_REPO: ${{ inputs.repo }}
+      shell: bash
+      run: |
+        echo "Flux Repo: ${FLUX_REPO}"
+        echo "Flux Branch: ${FLUX_BRANCH}"
+        if [[ "${FLUX_REPO}" == "" ]]; then
+            FLUX_REPO="https://github.com/flux-framework/flux-core"
+        fi
+        if [[ "${FLUX_BRANCH}" == "" ]]; then
+            FLUX_BRANCH="master"
+        fi
+        git clone -b ${FLUX_BRANCH} ${FLUX_REPO} /tmp/flux-core   
+        mv /tmp/flux-core/src/bindings/python/flux ./flux
+        /opt/conda/envs/build/bin/python3 setup.py sdist
+        sudo ldconfig
+
+    - name: Build Python Wheels
+      env:
+        build_number: ${{ inputs.rc }}
+        python_version: ${{ matrix.python }}
+      run: |
+        /bin/bash ./docker/build-wheels.sh ${build_number} ${python_version}
+        ls ./dist
+
+    - name: Upload distributions
+      if: success()
+      uses: actions/upload-artifact@v4
+      with:
+        name: ${{ matrix.python }}
+        path: ./dist
+
+  upload:
+    runs-on: ubuntu-latest
+    needs: [build-manual]
+    steps:
+    - name: Download Artifacts
+      uses: actions/download-artifact@v4
+      # If name unspecified, all artifacts download for run
+
+    - name: Show Files
+      run: |
+        ls */
+        # We just need one of these
+        first_dir=$(ls . | head -n 1)
+        mkdir -p ./dist
+        mv */*.whl ./dist/
+        cp ${first_dir}/*.tar.gz ./dist/
+        ls ./dist
+
+    - name: Build and publish
+      if: (github.event_name != 'pull_request')
+      env:
+        TWINE_USERNAME: ${{ secrets.PYPI_USER }}
+        TWINE_PASSWORD: ${{ secrets.PYPI_PASS }}
+      run: |
+        ls dist/
+        twine upload --skip-existing dist/flux_python*

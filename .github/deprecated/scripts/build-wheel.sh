@@ -17,6 +17,8 @@ echo "Building Python version ${version}"
 export PATH=/tmp/py${version}/bin:$PATH
 export PYTHONPATH=/tmp/py${version}/lib/python3.6/site-packages
 
+mamba activate build || true
+
 # Build the bindings for this python version!
 python3 setup.py sdist
 python3 setup.py bdist_wheel --plat-name=any --build-number=${build_number}

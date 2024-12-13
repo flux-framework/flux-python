@@ -3,8 +3,14 @@
 set -euo pipefail
 
 # This will be empty for nightly test, and we will clone master branch
-FLUX_RELEASE_VERSION=${FLUX_RELEASE_VERSION:-0.50.0}
-FLUX_VERSION=${FLUX_VERSION:-0.50.0}
+FLUX_RELEASE_VERSION=${FLUX_RELEASE_VERSION:-0.68.0}
+FLUX_VERSION=${FLUX_VERSION:-0.68.0}
+
+export DEBIAN_FRONTEND=noninteractive
+export TZ=UTC
+sudo ln -snf /usr/share/zoneinfo/$TZ /etc/localtime 
+echo $TZ > /tmp/timezone
+sudo mv /tmp/timezone /etc/timezone
 
 # Prepare the version file
 echo "Flux Version for pypi is ${FLUX_VERSION}"
@@ -45,14 +51,16 @@ sudo apt-get install -y \
 sudo ldconfig
 sudo rm -rf /var/lib/apt/lists/*
 
-sudo python3 -m pip install IPython
-sudo python3 -m pip install -r .github/scripts/requirements-dev.txt
-export LD_LIBRARY_PATH=/usr/local/lib:/usr/lib
+# noble and later requires --break-system-packages
+PIP_INSTALL="sudo /opt/conda/envs/build/bin/python3 -m pip install"
+${PIP_INSTALL} IPython || ${PIP_INSTALL} IPython --break-system-packages
+${PIP_INSTALL} -r .github/scripts/requirements-dev.txt || ${PIP_INSTALL} -r .github/scripts/requirements-dev.txt --break-system-packages
+export LD_LIBRARY_PATH=/usr/local/lib:/usr/lib:/opt/conda/envs/build/lib
 
 git clone https://github.com/flux-framework/flux-security ~/security
 cd ~/security
 ./autogen.sh
-./configure --prefix=/usr/local
+PYTHON=/opt/conda/envs/build/bin/python3 ./configure --prefix=/usr/local
 make 
 sudo make install
 sudo ldconfig
@@ -70,7 +78,7 @@ chmod +x etc/gen-cmdhelp.py
 
 # This is only needed for non-releases
 ./autogen.sh || echo "No autogen here"
-./configure --prefix=/usr/local
+PYTHON=/opt/conda/envs/build/bin/python3 ./configure --prefix=/usr/local
 
 # We don't really care about the version here -just building python bindings
 make VERBOSE=1
