@@ -17,3 +17,4 @@ sudo /opt/conda/bin/mamba activate build
 echo "Building Python version ${version}"
 /opt/conda/envs/build/bin/python3 -m pip install cffi ply six pyyaml jsonschema
 sudo chown -R $(id -u) /opt/conda
+/opt/conda/envs/build/bin/python3 -m pip install --upgrade pkginfo
