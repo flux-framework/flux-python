@@ -103,6 +103,7 @@ jobs:
         TWINE_PASSWORD: ${{ secrets.PYPI_PASS }}
       run: |
         ls dist/
-        python3 -m pip install setuptools wheel twine
+        python3 -m pip install setuptools wheel
+        python3 -m pip install twine==6.0.1
         python3 -m pip install --upgrade pkginfo
         twine upload --skip-existing dist/flux_python*
