@@ -6,7 +6,10 @@ sudo apt-get update && sudo apt-get install -y curl
 
 # Install mamba for different python versions
 # Python - instead of a system python we install mamba
-curl -L https://github.com/conda-forge/miniforge/releases/download/24.11.3-0/Miniforge3-24.11.3-0-Linux-x86_64.sh > mambaforge.sh
+curl -L https://github.com/conda-forge/miniforge/releases/download/24.3.0-0/Mambaforge-24.3.0-0-Linux-x86_64.sh > mambaforge.sh
+
+# Does not build 3.8
+# curl -L https://github.com/conda-forge/miniforge/releases/download/24.11.3-0/Miniforge3-24.11.3-0-Linux-x86_64.sh > mambaforge.sh
 chmod +x ./mambaforge.sh
 sudo bash mambaforge.sh -b -p /opt/conda
 rm mambaforge.sh
