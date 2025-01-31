@@ -104,4 +104,5 @@ jobs:
       run: |
         ls dist/
         python3 -m pip install setuptools wheel twine
+        python3 -m pip install --upgrade pkginfo
         twine upload --skip-existing dist/flux_python*
