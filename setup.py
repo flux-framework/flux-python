@@ -54,7 +54,7 @@ def find_flux():
             "Cannot find executable flux, which is required to be on PATH to find the install location."
         )
     # /usr/local/bin/flux --> /usr/local
-    return os.path.dirname(os.path.dirname(path))
+    return os.path.dirname(os.path.dirname(os.path.realpath(path)))
 
 
 flux_root = find_flux()
