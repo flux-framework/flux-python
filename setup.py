@@ -21,7 +21,7 @@ from contextlib import contextmanager
 
 from setuptools import find_packages
 from setuptools import setup as _setup
-from distutils.core import setup, Command
+from distutils.core import setup
 
 # Metadata
 package_name = "flux-python"
@@ -57,7 +57,30 @@ def find_flux():
     return os.path.dirname(os.path.dirname(os.path.realpath(path)))
 
 
-flux_root = find_flux()
+def is_info_command():
+    """
+    Check if we're running a command that only needs package metadata
+    and doesn't require Flux to be installed.
+    """
+    info_commands = {
+        "egg_info",
+        "sdist",
+        "--name",
+        "--description",
+        "--help",
+        "--help-commands",
+        "--version",
+    }
+    # This is akin to calling --help
+    if len(sys.argv) == 1 and sys.argv[0] == "setup.py":
+        return True
+    return any(cmd in sys.argv for cmd in info_commands)
+
+
+# Only find flux if we're not running an info command
+flux_root = None
+if not is_info_command():
+    flux_root = find_flux()
 
 # Module specific default options files. Format strings below will be populated
 # after receiving the custom varibles from the user
@@ -335,35 +358,38 @@ def setup():
     global security_include
     global has_flux_security
 
-    # Always set the install root to the environment
-    set_envar("FLUX_INSTALL_ROOT", flux_root)
+    if is_info_command():
+        cffi_modules = None
+    else:
+        # Always set the install root to the environment
+        set_envar("FLUX_INSTALL_ROOT", flux_root)
 
-    # The flux security path should be in the same root, under includes
-    security_include = os.path.join(flux_root, "include", "flux", "security")
-    has_flux_security = True
-    if not os.path.exists(security_include):
-        print(f"Cannot find flux security under expected path {security_include}")
-        has_flux_security = False
+        # The flux security path should be in the same root, under includes
+        security_include = os.path.join(flux_root, "include", "flux", "security")
+        has_flux_security = True
+        if not os.path.exists(security_include):
+            print(f"Cannot find flux security under expected path {security_include}")
+            has_flux_security = False
 
-    # We only want this to run on creating the tarball or install
-    command = sys.argv[1]
-    print(f"Command is {command}")
-    prepare = PrepareFluxHeaders(flux_root)
-    prepare.run()
+        # We only want this to run on creating the tarball or install
+        command = sys.argv[1]
+        print(f"Command is {command}")
+        prepare = PrepareFluxHeaders(flux_root)
+        prepare.run()
 
-    # Request to install additional modules (we always do core0
-    # We also have to remove the setup.py flags that aren't known
-    cffi_modules = ["src/_core_build.py:ffi"]
-    for build_type in build_types:
-        # If we don't have flux security
-        if build_type == "security" and not has_flux_security:
-            continue
-        # We always include / require core (may not be necessary)
-        if build_type == "core":
-            continue
-        cffi_modules.append("src/_%s_build.py:ffi" % build_type)
+        # Request to install additional modules (we always do core0
+        # We also have to remove the setup.py flags that aren't known
+        cffi_modules = ["src/_core_build.py:ffi"]
+        for build_type in build_types:
+            # If we don't have flux security
+            if build_type == "security" and not has_flux_security:
+                continue
+            # We always include / require core (may not be necessary)
+            if build_type == "core":
+                continue
+            cffi_modules.append("src/_%s_build.py:ffi" % build_type)
 
-    print("cffi_modules:\n%s" % "\n".join(cffi_modules))
+        print("cffi_modules:\n%s" % "\n".join(cffi_modules))
 
     # This assumes relative location of Flux install
     # Now with cffi for final install
