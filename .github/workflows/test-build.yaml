@@ -17,7 +17,7 @@ jobs:
 
     - name: Build Flux Core
       env:
-        FLUX_RELEASE_VERSION: "0.50.0"
+        FLUX_RELEASE_VERSION: "0.78.0"
       run: /bin/bash .github/scripts/setup.sh
 
     - name: Build Python Bindings

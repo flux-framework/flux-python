@@ -4,8 +4,8 @@
 set -euo pipefail
 
 # This will be empty for nightly test, and we will clone master branch
-FLUX_RELEASE_VERSION=${FLUX_RELEASE_VERSION:-0.68.0}
-FLUX_VERSION=${FLUX_VERSION:-0.68.0}
+FLUX_RELEASE_VERSION=${FLUX_RELEASE_VERSION:-0.78.0}
+FLUX_VERSION=${FLUX_VERSION:-0.78.0}
 
 if [[ "$(uname)" == "Darwin" ]]; then
   brew install \
@@ -36,19 +36,17 @@ if [[ "$(uname)" == "Darwin" ]]; then
   export DYLD_LIBRARY_PATH=/usr/local/lib
   
   # Ensure we activate micromamabe that has a pinned version
-  eval "$(micromamba shell hook --shell bash)" || micromamba shell reinit --shell bash
-  micromamba activate build-env
-  echo "Found MacOS Python $(which python3)"
-  PIP_INSTALL="python3 -m pip install"
+  PIP_INSTALL="/opt/conda/bin/python3 -m pip install"
   ln -s $(which glibtoolize) /usr/local/bin/libtoolize
   
   CPPFLAGS="-I${HOMEBREW_PREFIX}/include/lua"
   CPPFLAGS="-I$(brew --prefix libev)/include ${CPPFLAGS}"
   CPPFLAGS="-I$(brew --prefix epoll-shim)/include/libepoll-shim ${CPPFLAGS}"
-  LDFLAGS=-L${HOMEBREW_PREFIX}/lib
+  # LDFLAGS=-L${HOMEBREW_PREFIX}/lib
   PKG_CONFIG_PATH=$(pkg-config --variable pc_path pkg-config)
   PKG_CONFIG_PATH=$(brew --prefix libarchive)/lib/pkgconfig:${PKG_CONFIG_PATH}
   PATH=$(brew --prefix libtool)/libexec/gnubin:$PATH
+  export LD_LIBRARY_PATH="/opt/conda/envs/build/lib:/opt/conda/envs/build/lib64"
 
 # Linux block!
 else
@@ -90,8 +88,22 @@ else
 
   # Set the dynamic library path variable for Linux. The conda path is for the container.
   export LD_LIBRARY_PATH=/usr/local/lib:/usr/lib:/opt/conda/envs/build/lib
-  PIP_INSTALL="/opt/conda/envs/build/bin/python3 -m pip install"
 fi
+
+# Ensure we find micromamba environment first
+# mamba init commands are intolerable so let's do basics ourselves.
+PIP_INSTALL="/opt/conda/envs/build/bin/python3 -m pip install"
+export PATH="/opt/conda/envs/build/bin:$PATH"
+export PYTHONPATH=$(find /opt/conda/envs/build -name site-packages)
+export PYTHON=/opt/conda/envs/build/bin/python3
+export PYTHON_PREFIX=${PYTHONPATH}
+export PYTHON_EXEC_PREFIX=${PYTHONPATH}
+# export LIBS="-L/opt/conda/envs/build/lib:/opt/conda/envs/build/lib64"
+
+echo "Found Python $(which python3)"
+echo "PYTHONPATH: ${PATH}"
+echo "PATH: ${PATH}"
+echo "LD_LIBRARY_PATH: ${LD_LIBRARY_PATH}"
 
 # Here we can start common setup (we hope)
 echo "Flux Version for pypi is ${FLUX_VERSION}"
@@ -109,11 +121,11 @@ here=$(pwd)
 # I like how "--break-system-packages" is analogous with --i-acknowledge-i-am-a-terrible-person
 if [[ "$(uname)" == "Darwin" ]]; then
   echo "Installing python requirements for MacOS"
-  ${PIP_INSTALL} IPython setuptools ply sphinx cffi
+  ${PIP_INSTALL} IPython setuptools ply sphinx cffi pyyaml
   ${PIP_INSTALL} -r .github/scripts/requirements-dev.txt
 else
   echo "Installing python requirements for Linux"
-  ${PIP_INSTALL} IPython || ${PIP_INSTALL} IPython --break-system-packages
+  ${PIP_INSTALL} IPython pyyaml || ${PIP_INSTALL} IPython --break-system-packages pyyaml
   ${PIP_INSTALL} -r .github/scripts/requirements-dev.txt || ${PIP_INSTALL} -r .github/scripts/requirements-dev.txt --break-system-packages
 
   # Flux Security --
@@ -121,7 +133,7 @@ else
   git clone https://github.com/flux-framework/flux-security ~/security
   cd ~/security
   ./autogen.sh
-  ./configure --prefix=/usr/local
+  PYTHON_PREFIX=PYTHON_EXEC_PREFIX=${PYTHON_PREFIX} PYTHON=/opt/conda/bin/python3 ./configure --prefix=/usr/local
   make
   sudo make install
   sudo ldconfig
@@ -138,9 +150,9 @@ chmod +x etc/gen-cmdhelp.py
 ./autogen.sh || echo "No autogen here"
 
 if [[ "$(uname)" == "Darwin" ]]; then
-  CPPFLAGS="$CPPFLAGS" LDFLAGS=$LDFLAGS PKG_CONFIG_PATH=$PKG_CONFIG_PATH \
-    ./configure --with-external-libev --prefix=/usr/local
-  ./scripts/check-macos.sh
+  CPPFLAGS="$CPPFLAGS" PKG_CONFIG_PATH=$PKG_CONFIG_PATH ./configure --prefix=/usr/local
+  ls ./scripts
+  ./scripts/check-macos.sh || echo "No check-macos.sh"
 else
   ./configure --prefix=/usr/local
   make VERBOSE=1
