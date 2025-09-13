@@ -1,4 +1,4 @@
-name: build flux-python
+name: flux-python
 
 on:
   pull_request: {}
@@ -20,22 +20,33 @@ on:
         default: "https://github.com/flux-framework/flux-core"
 
 jobs:
-  build-manual:
-    runs-on: ubuntu-latest
+  build:
+    name: ${{ matrix.os }} Python ${{ matrix.python }}
+    runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
       matrix:
+        # The matrix now includes both os and python
+        os: [ubuntu-latest, macos-latest]
         python: ["3.8", "3.9", "3.10", "3.11"]
-    container:
-      image: fluxrm/testenv:jammy
+
     steps:
     - uses: actions/checkout@v4
-    - name: Setup Python
+    - name: Setup Python (Linux)
+      if: runner.os == 'Linux'
       env:
         python_version: ${{ matrix.python }}
-      # Installs to /opt/conda/envs/build/bin/python3
-      run: /bin/bash ./docker/install-mamba.sh ${python_version}
+      run: /bin/bash ./docker/install-mamba.sh ${{ matrix.python }}
 
+    # Use micromamba for MacOS and hope someone else figured this out :)
+    - name: Setup Python (macOS)
+      if: runner.os == 'macOS'
+      uses: mamba-org/setup-micromamba@v1
+      with:
+        environment-name: build-env
+        create-args: python=${{ matrix.python }}
+
+    # The login shell ensures the mamba env is active
     - name: Build Flux Core Branch
       env:
         FLUX_RELEASE_VERSION: ${{ inputs.release_version }}
@@ -43,67 +54,71 @@ jobs:
       run: /bin/bash .github/scripts/setup.sh
 
     - name: Build Python Bindings
+      shell: bash -l {0}
       env:
         FLUX_BRANCH: ${{ inputs.branch }}
         FLUX_REPO: ${{ inputs.repo }}
-      shell: bash
       run: |
-        echo "Flux Repo: ${FLUX_REPO}"
-        echo "Flux Branch: ${FLUX_BRANCH}"
-        if [[ "${FLUX_REPO}" == "" ]]; then
-            FLUX_REPO="https://github.com/flux-framework/flux-core"
+        echo "Flux Repo: ${{ inputs.repo }}"
+        echo "Flux Branch: ${{ inputs.branch }}"
+        
+        # Use default values if inputs are empty
+        FLUX_REPO_URL=${FLUX_REPO:-"https://github.com/flux-framework/flux-core"}
+        FLUX_BRANCH_NAME=${FLUX_BRANCH:-"master"}
+
+        git clone -b ${FLUX_BRANCH_NAME} ${FLUX_REPO_URL} /tmp/flux-core
+        mv /tmp/flux-core/src/bindings/python/flux ./flux        
+        python setup.py sdist
+
+        # I think ldconfig is Linux-specific
+        if [[ "${{ runner.os }}" == "Linux" ]]; then
+          sudo ldconfig
         fi
-        if [[ "${FLUX_BRANCH}" == "" ]]; then
-            FLUX_BRANCH="master"
-        fi
-        git clone -b ${FLUX_BRANCH} ${FLUX_REPO} /tmp/flux-core   
-        mv /tmp/flux-core/src/bindings/python/flux ./flux
-        /opt/conda/envs/build/bin/python3 setup.py sdist
-        sudo ldconfig
 
     - name: Build Python Wheels
+      shell: bash -l {0}
       env:
         build_number: ${{ inputs.rc }}
         python_version: ${{ matrix.python }}
       run: |
-        /bin/bash ./docker/build-wheels.sh ${build_number} ${python_version}
+        /bin/bash ./docker/build-wheels.sh ${{ env.build_number }} ${{ env.python_version }}
         ls ./dist
 
     - name: Upload distributions
-      if: success()
       uses: actions/upload-artifact@v4
       with:
-        name: ${{ matrix.python }}
+        # The artifact name must be unique for each job in the matrix
+        name: dist-${{ matrix.python }}-${{ matrix.os }}
         path: ./dist
 
   upload:
     runs-on: ubuntu-latest
-    needs: [build-manual]
+    # This job now needs the entire build matrix to complete successfully
+    needs: [build]
     steps:
     - name: Download Artifacts
       uses: actions/download-artifact@v4
-      # If name unspecified, all artifacts download for run
+      with:
+        # Download all artifacts created by the build jobs
+        path: artifacts
 
-    - name: Show Files
+    - name: Show and Organize Files
       run: |
-        ls */
-        # We just need one of these
-        first_dir=$(ls . | head -n 1)
+        ls -R artifacts
         mkdir -p ./dist
-        mv */*.whl ./dist/
-        cp ${first_dir}/*.tar.gz ./dist/
+        # This command finds all wheel and tar.gz files in all subdirectories
+        # and moves them into a single ./dist directory for upload.
+        find artifacts -type f \( -name "*.whl" -o -name "*.tar.gz" \) -exec mv {} ./dist/ \;
         echo
         echo "Files to distribute:"
         ls ./dist
 
     - name: Build and publish
+      # Ensure this only runs on pushes to a main branch, not PRs
       if: (github.event_name != 'pull_request')
       env:
         TWINE_USERNAME: ${{ secrets.PYPI_USER }}
         TWINE_PASSWORD: ${{ secrets.PYPI_PASS }}
       run: |
-        ls dist/
-        python3 -m pip install setuptools wheel
-        python3 -m pip install twine==6.0.1
-        python3 -m pip install --upgrade pkginfo
-        twine upload --skip-existing dist/flux_python*
+        python3 -m pip install --upgrade twine
+        twine upload --skip-existing dist/*
