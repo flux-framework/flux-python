@@ -6,12 +6,14 @@ on:
     - cron: "5 4 * * *"
 
 jobs:
-  build:
+  build-ubuntu:
+    name: Build on Ubuntu
     runs-on: ubuntu-latest
+    # The container provides a pre-built environment, specific to Linux.
     container:
       image: fluxrm/testenv:focal
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
 
     - name: Build Flux Core
       env:
@@ -26,4 +28,40 @@ jobs:
     - name: Build Python Wheels
       run: |
         /bin/bash ./docker/install-mamba.sh
+        /bin/bash ./docker/build-wheels.sh
+
+  build-macos:
+    name: Build on macOS
+    runs-on: macos-latest
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Set up Micromamba
+      # macOS runners do not use containers, so we must set up the 
+      # Mamba environment from scratch using a standard action.
+      uses: mamba-org/setup-micromamba@v1
+      with:
+        environment-name: build-env
+        create-args: >-
+          python=3.9
+
+    - name: Build Flux Core
+      env:
+        FLUX_RELEASE_VERSION: "0.50.0"
+
+      # Using a login shell to ensure micromamba is activated
+      shell: bash -l {0}
+      run: /bin/bash .github/scripts/setup.sh
+
+    - name: Build Python Bindings
+      shell: bash -l {0}
+      run: |
+        mv /code/src/bindings/python/flux ./flux
+        python3 setup.py sdist
+  
+    - name: Build Python Wheels
+      shell: bash -l {0}
+      run: |
+        # The setup-micromamba action handles the installation,
+        # so we can skip the install-mamba.sh script here.
         /bin/bash ./docker/build-wheels.sh
