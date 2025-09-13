@@ -28,52 +28,29 @@ jobs:
       matrix:
         # The matrix now includes both os and python
         os: [ubuntu-latest, macos-latest]
-        python: ["3.8", "3.9", "3.10", "3.11"]
+        python: ["py38", "py39", "py310", "py311", "py312"]
 
     steps:
     - uses: actions/checkout@v4
-    - name: Setup Python
-      env:
-        python_version: ${{ matrix.python }}
-      run: /bin/bash ./docker/install-mamba.sh ${{ matrix.python }}
+    - uses: prefix-dev/setup-pixi@v0.9.0
+      with:
+        environments: ${{ matrix.python }}
 
-    # The login shell ensures the mamba env is active
     - name: Build Flux Core Branch
-      env:
-        FLUX_RELEASE_VERSION: ${{ inputs.release_version }}
-        FLUX_VERSION: ${{ inputs.version }}
-      run: /bin/bash .github/scripts/setup.sh
+      run: pixi run -e ${{ matrix.python }} bash .github/scripts/setup.sh ${{ matrix.python }} ${{ inputs.release_version }} ${{ inputs.version }}
+
+    - name: Upload logs on failure
+      if: ${{ always() }}
+      uses: actions/upload-artifact@v4
+      with:
+        name: config-log-${{ matrix.python }}-${{ matrix.os }}
+        path: ./config.log
 
     - name: Build Python Bindings
-      shell: bash -l {0}
-      env:
-        FLUX_BRANCH: ${{ inputs.branch }}
-        FLUX_REPO: ${{ inputs.repo }}
-      run: |
-        echo "Flux Repo: ${{ inputs.repo }}"
-        echo "Flux Branch: ${{ inputs.branch }}"
-        
-        # Use default values if inputs are empty
-        FLUX_REPO_URL=${FLUX_REPO:-"https://github.com/flux-framework/flux-core"}
-        FLUX_BRANCH_NAME=${FLUX_BRANCH:-"master"}
-
-        git clone -b ${FLUX_BRANCH_NAME} ${FLUX_REPO_URL} /tmp/flux-core
-        mv /tmp/flux-core/src/bindings/python/flux ./flux        
-        python setup.py sdist
-
-        # I think ldconfig is Linux-specific
-        if [[ "${{ runner.os }}" == "Linux" ]]; then
-          sudo ldconfig
-        fi
+      run: pixi run -e ${{ matrix.python }} bash .github/scripts/build-bindings.sh ${{ inputs.branch }} ${{ inputs.repo }}
 
     - name: Build Python Wheels
-      shell: bash -l {0}
-      env:
-        build_number: ${{ inputs.rc }}
-        python_version: ${{ matrix.python }}
-      run: |
-        /bin/bash ./docker/build-wheels.sh ${{ env.build_number }} ${{ env.python_version }}
-        ls ./dist
+      run: pixi run -e ${{ matrix.python }} bash ./docker/build-wheels.sh ${{ env.build_number }} ${{ env.python_version }}
 
     - name: Upload distributions
       uses: actions/upload-artifact@v4

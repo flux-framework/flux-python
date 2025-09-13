@@ -3,52 +3,15 @@
 # Exit on error, unset variable, or pipe failure
 set -euo pipefail
 
-# This will be empty for nightly test, and we will clone master branch
-FLUX_RELEASE_VERSION=${FLUX_RELEASE_VERSION:-0.78.0}
-FLUX_VERSION=${FLUX_VERSION:-0.78.0}
+# This must be set
+PYTHON_VERSION=${1:-py311}
+
+# These will be empty for nightly test, and we will clone master branch
+FLUX_RELEASE_VERSION=${2:-0.78.0}
+FLUX_VERSION=${3:-0.78.0}
 
 if [[ "$(uname)" == "Darwin" ]]; then
-  brew install \
-    autoconf \
-    automake \
-    libtool \
-    make \
-    pkg-config \
-    epoll-shim \
-    libev \
-    zeromq \
-    jansson \
-    lz4 \
-    libarchive \
-    hwloc \
-    sqlite \
-    lua \
-    luarocks \
-    cffi \
-    libyaml \
-    jq
-
-  # Possibility - install munge with MacPorts
-  # sudo port install munge
-  eval "$(/opt/homebrew/bin/brew shellenv)"
-
-  # Set the dynamic library path variable for macOS
-  export DYLD_LIBRARY_PATH=/usr/local/lib
-  
-  # Ensure we activate micromamabe that has a pinned version
-  PIP_INSTALL="/opt/conda/bin/python3 -m pip install"
-  ln -s $(which glibtoolize) /usr/local/bin/libtoolize
-  
-  CPPFLAGS="-I${HOMEBREW_PREFIX}/include/lua"
-  CPPFLAGS="-I$(brew --prefix libev)/include ${CPPFLAGS}"
-  CPPFLAGS="-I$(brew --prefix epoll-shim)/include/libepoll-shim ${CPPFLAGS}"
-  # LDFLAGS=-L${HOMEBREW_PREFIX}/lib
-  PKG_CONFIG_PATH=$(pkg-config --variable pc_path pkg-config)
-  PKG_CONFIG_PATH=$(brew --prefix libarchive)/lib/pkgconfig:${PKG_CONFIG_PATH}
-  PATH=$(brew --prefix libtool)/libexec/gnubin:$PATH
-  export LD_LIBRARY_PATH="/opt/conda/envs/build/lib:/opt/conda/envs/build/lib64"
-
-# Linux block!
+  brew install zeromq libsodium epoll-shim libev
 else
   export DEBIAN_FRONTEND=noninteractive
   export TZ=UTC
@@ -64,7 +27,6 @@ else
           libzmq3-dev \
           libczmq-dev \
           libjansson-dev \
-          libmunge-dev \
           libncursesw5-dev \
           lua5.3 \
           liblua5.3-dev \
@@ -76,8 +38,6 @@ else
           libs3-dev \
           libevent-dev \
           libarchive-dev \
-          python3-sphinx \
-          python3-cffi \
           libtool \
           git \
           build-essential \
@@ -86,54 +46,81 @@ else
   sudo rm -rf /var/lib/apt/lists/*
   sudo ldconfig
 
-  # Set the dynamic library path variable for Linux. The conda path is for the container.
-  export LD_LIBRARY_PATH=/usr/local/lib:/usr/lib:/opt/conda/envs/build/lib
+  # Set the dynamic library path variable for Linux.
+  export LD_LIBRARY_PATH=/usr/local/lib:/usr/lib
+  echo "LD_LIBRARY_PATH: ${LD_LIBRARY_PATH}"
 fi
 
-# Ensure we find micromamba environment first
-# mamba init commands are intolerable so let's do basics ourselves.
-PIP_INSTALL="/opt/conda/envs/build/bin/python3 -m pip install"
-export PATH="/opt/conda/envs/build/bin:$PATH"
-export PYTHONPATH=$(find /opt/conda/envs/build -name site-packages)
-export PYTHON=/opt/conda/envs/build/bin/python3
-export PYTHON_PREFIX=${PYTHONPATH}
-export PYTHON_EXEC_PREFIX=${PYTHONPATH}
-# export LIBS="-L/opt/conda/envs/build/lib:/opt/conda/envs/build/lib64"
-
 echo "Found Python $(which python3)"
-echo "PYTHONPATH: ${PATH}"
 echo "PATH: ${PATH}"
-echo "LD_LIBRARY_PATH: ${LD_LIBRARY_PATH}"
 
 # Here we can start common setup (we hope)
 echo "Flux Version for pypi is ${FLUX_VERSION}"
 if [[ "$(uname)" == "Darwin" ]]; then
+  PIXI_ROOT=/Users/runner/work/flux-python/flux-python/.pixi
+  PIXI_ENV=${PIXI_ROOT}/envs/${PYTHON_VERSION}
   sed -i '' "s/version = \"0.0.0\"/version = \"$FLUX_VERSION\"/" pyproject.toml
+  echo $(find /Users/runner/ -name python3) || echo $(find /Users/runner/ -name python)
+
+  # Tell where to look for lua.h
+  CPPFLAGS="-I${PIXI_ENV}/include"
+  
+  # This makes me want to kill homebrew and MacOS with fire.
+  # I know most of these aren't required. I can't remove them because of the ❤️‍🔥
+  export PYTHON_SITE_PACKAGES=$(find ${PIXI_ENV} -name site-packages)
+  export PYTHON_EXEC_PREFIX=${PYTHON_SITE_PACKAGES}
+  export PYTHON_SITE_PKG=${PYTHON_SITE_PACKAGES}
+  export PYTHON_PLATFORM_SITE_PKG=${PYTHON_SITE_PACKAGES}
+  export PYTHON_SITELIB=${PYTHON_SITE_PACKAGES}
+  export PYTHON_PREFIX=${PYTHON_SITE_PACKAGES}
+  export PKG_CONFIG_PATH=${PIXI_ENV}/lib/pkgconfig
+  export PYTHONDIR=${PYTHON_SITE_PACKAGES}
+  
+  # Set these to empty.
+  export PYTHON_EXTRA_LDFLAGS=" "
+  export PYTHON_EXTRA_LIBS=" "
+
+  echo "PKG_CONFIG_PATH: ${PKG_CONFIG_PATH}"
+  echo "PYTHON_PREFIX: ${PYTHON_PREFIX}"
+  echo "PYTHON_SITE_PACKAGES: ${PYTHON_SITE_PACKAGES}"
+  echo "PYTHON_EXEC_PREFIX: ${PYTHON_EXEC_PREFIX}"
 else
+  PIXI_ROOT=/home/runner/work/flux-python/flux-python/.pixi
+  export PIXI_ENV=${PIXI_ROOT}/envs/${PYTHON_VERSION}
   sed -i "s/version = \"0.0.0\"/version = \"$FLUX_VERSION\"/" pyproject.toml
+  CPPFLAGS="-I${PIXI_ENV}/include"
 fi
->>>>>>> 922e452 (ci: test updated main build script to add macOS)
+
+# Can we remove need for setuptools?
+export PYTHON=${PIXI_ENV}/bin/python3
+export PYTHON_EXECUTABLE=${PIXI_ENV}/bin/python3
+export PYTHON_NOVERSIONCHECK=yes
+export LUA_CFLAGS="-I${PIXI_ENV}/include"
+export LDFLAGS="-L${PIXI_ENV}/lib -L${PIXI_ENV}/lib64" 
+echo "Found lua.h in:\n$(find ${PIXI_ROOT} -name lua.h)" || echo "Did not find lua.h"
 
 # Store current directory
 here=$(pwd)
+luarocks install luaposix
 
-# Install Python requirements using the OS-specific pip command - allow for ubuntu to be 24.04 or not.
-# I like how "--break-system-packages" is analogous with --i-acknowledge-i-am-a-terrible-person
-if [[ "$(uname)" == "Darwin" ]]; then
-  echo "Installing python requirements for MacOS"
-  ${PIP_INSTALL} IPython setuptools ply sphinx cffi pyyaml
-  ${PIP_INSTALL} -r .github/scripts/requirements-dev.txt
-else
-  echo "Installing python requirements for Linux"
-  ${PIP_INSTALL} IPython pyyaml || ${PIP_INSTALL} IPython --break-system-packages pyyaml
-  ${PIP_INSTALL} -r .github/scripts/requirements-dev.txt || ${PIP_INSTALL} -r .github/scripts/requirements-dev.txt --break-system-packages
+# Flux Security --
+# Does not have a variant for Mac
+if [[ "$(uname)" != "Darwin" ]]; then
+  
+  # Install munge and libmunge
+  MUNGE_VERSION="0.5.16"
+  curl -L "https://github.com/dun/munge/releases/download/munge-${MUNGE_VERSION}/munge-${MUNGE_VERSION}.tar.xz" -o munge.tar.xz
+  tar -xf munge.tar.xz
+  cd "munge-${MUNGE_VERSION}"
+  ./configure --prefix=/usr
+  make
+  sudo make install
+  cd ..
 
-  # Flux Security --
-  # Does not have a variant for Mac
   git clone https://github.com/flux-framework/flux-security ~/security
   cd ~/security
   ./autogen.sh
-  PYTHON_PREFIX=PYTHON_EXEC_PREFIX=${PYTHON_PREFIX} PYTHON=/opt/conda/bin/python3 ./configure --prefix=/usr/local
+  ./configure --prefix=/usr/local
   make
   sudo make install
   sudo ldconfig
@@ -150,11 +137,27 @@ chmod +x etc/gen-cmdhelp.py
 ./autogen.sh || echo "No autogen here"
 
 if [[ "$(uname)" == "Darwin" ]]; then
-  CPPFLAGS="$CPPFLAGS" PKG_CONFIG_PATH=$PKG_CONFIG_PATH ./configure --prefix=/usr/local
-  ls ./scripts
-  ./scripts/check-macos.sh || echo "No check-macos.sh"
+
+  # Mac you are a JERK
+  ZMQ_PREFIX=$(brew --prefix zeromq)
+  SODIUM_PREFIX=$(brew --prefix libsodium)
+  LIBEV_PREFIX=$(brew --prefix libev)
+  EPOLL_SHIM_PREFIX=$(brew --prefix epoll-shim)
+
+  CPPFLAGS="-I'"$EPOLL_SHIM_PREFIX"'/include -I'"$LIBEV_PREFIX"'/include -I'"$ZMQ_PREFIX"'/include -I'"$SODIUM_PREFIX"'/include -I$PIXI_ENV/include"
+  CPPFLAGS="-I$(brew --prefix libev)/include ${CPPFLAGS}"
+  export CPPFLAGS="-I$(brew --prefix epoll-shim)/include/libepoll-shim ${CPPFLAGS}"
+  export LDFLAGS="$LDFLAGS -L'"$EPOLL_SHIM_PREFIX"'/lib -L'"$LIBEV_PREFIX"'/lib -L'"$SODIUM_PREFIX"'/lib -L'"$ZMQ_PREFIX"'/lib -Wl,-rpath,'"$SODIUM_PREFIX"'/lib -Wl,-rpath,$PIXI_ENV/lib"
+  CPPFLAGS="$CPPFLAGS" CFLAGS="${CPPFLAGS}" LDFLAGS="${LDFLAGS}" PKG_CONFIG_PATH=$PKG_CONFIG_PATH ./configure --prefix=/usr/local --with-external-libev || (cp ./config.log ../ && exit 1)
+
+  # Surgery. This is the biggest hairball ever - you can't build libsodium / zeromq from source because it doesn't detect curve+libsodium.
+  # You also can't use easily from Homebrew without this hack. I can't even believe I figured this out!
+  find . -name "Makefile" -exec sed -i.bak "s/^\(LIBS = .*\)$/\1 -lepoll-shim/" {} +
+  make -j  || (cp ./config.log ../ && exit 1)
+  sudo make install  || (cp ./config.log ../ && exit 1)
 else
-  ./configure --prefix=/usr/local
+  ./configure CPPFLAGS="$CPPFLAGS" CFLAGS="${CPPFLAGS}" LDFLAGS="${LDFLAGS}" --prefix=/usr/local
+  cp ./config.log ../
   make VERBOSE=1
   sudo make install || true
   sudo make install
