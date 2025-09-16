@@ -23,22 +23,6 @@ from setuptools import find_packages
 from setuptools import setup as _setup
 from distutils.core import setup
 
-# Metadata
-package_name = "flux-python"
-package_version = "develop"
-package_description = "Python bindings for the flux resource manager API"
-package_url = "https://github.com/flux-framework/flux-python"
-package_keywords = "flux, job manager, workload manager, orchestration, hpc"
-
-try:
-    with open("README.md") as filey:
-        package_long_description = filey.read()
-except Exception:
-    package_long_description = package_description
-
-# Setup variables for dependencies
-cffi_dep = "cffi>=1.1"
-
 # src/bindings/python
 root = os.path.dirname(os.path.abspath(__file__))
 source = os.path.join(root, "src")
@@ -65,10 +49,15 @@ def is_info_command():
     info_commands = {
         "egg_info",
         "sdist",
-        "--name",
+        "--classifiers",
         "--description",
+        "--fullname",
         "--help",
         "--help-commands",
+        "--keywords",
+        "--long-description",
+        "--name",
+        "--url",
         "--version",
     }
     # This is akin to calling --help
@@ -339,11 +328,11 @@ class HeaderCleaner:
         """
         with open(f, "r") as header:
             for l in header.readlines():
-                m = re.search('#include\s*"([^"]*)"', l)
+                m = re.search(r'#include\s*"([^"]*)"', l)
                 if m:
                     nf = find_first(self.search, m.group(1), including_path)
                     self.process_header(nf, os.path.dirname(os.path.abspath(nf)))
-                if not re.match("#\s*include", l):
+                if not re.match(r"#\s*include", l):
                     self.mega_header += l
 
         # Flag as checked
@@ -394,35 +383,10 @@ def setup():
     # This assumes relative location of Flux install
     # Now with cffi for final install
     _setup(
-        name=package_name,
-        version=package_version,
-        description=package_description,
-        long_description=package_long_description,
-        long_description_content_type="text/markdown",
-        keywords=package_keywords,
-        url=package_url,
-        setup_requires=[cffi_dep],
         packages=find_packages(),
         include_package_data=True,
         zip_safe=False,
-        install_requires=[cffi_dep, "pyyaml"],
-        extras_require={
-            "dev": ["pyyaml", "jsonschema", "docutils", "black", "IPython"]
-        },
-        classifiers=[
-            "Intended Audience :: Science/Research",
-            "Intended Audience :: Developers",
-            "License :: OSI Approved :: GNU Lesser General Public License v3 or later (LGPLv3+)",
-            "Programming Language :: C++",
-            "Programming Language :: Python",
-            "Topic :: Software Development",
-            "Topic :: Scientific/Engineering",
-            "Operating System :: Unix",
-            "Programming Language :: Python :: 3.6",
-            "Programming Language :: Python :: 3.7",
-            "Programming Language :: Python :: 3.8",
-            "Programming Language :: Python :: 3.9",
-        ],
+        url="https://github.com/flux-framework/flux-python",
         cffi_modules=cffi_modules,
     )
 
