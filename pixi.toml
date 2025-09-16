@@ -46,6 +46,8 @@ libcxx = "*"
 libsodium = "*"
 argp-standalone = "*"
 libuuid = "*"
+libxml2 = "*"
+libxml2-devel = "*"
 
 [pypi-dependencies]
 setuptools = "*"
