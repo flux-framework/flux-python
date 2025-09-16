@@ -121,12 +121,9 @@ $ python3 setup.py sdist
 $ python3 setup.py sdist bdist_wheel
 ```
 
-You can build versions of the Python wheels across 3.6 to 3.10 like:
+Given an environment with dependencies, you can build versions of the Python wheels across 3.6 to 3.12 like:
 
 ```bash
-# only need to run this once in the container
-/bin/bash ./docker/install-mamba.sh
-
 # And this to install the current Flux + version in setup.py as a wheel
 # The number is the build number
 /bin/bash ./docker/build-wheels.sh 2
