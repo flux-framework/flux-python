@@ -14,7 +14,7 @@ sudo mv /tmp/timezone /etc/timezone
 
 # Prepare the version file
 echo "Flux Version for pypi is ${FLUX_VERSION}"
-sed -i "s/package_version = \"develop\"/package_version = \"$FLUX_VERSION\"/" setup.py
+sed -i "s/version = \"0.0.0\"/version = \"$FLUX_VERSION\"/" pyproject.toml
 
 here=$(pwd)
 sudo apt-get update

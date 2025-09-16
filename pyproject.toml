@@ -1,0 +1,56 @@
+[build-system]
+
+# These correspond to setup_requires
+requires = [
+    "setuptools>=42",
+    "wheel",
+    "cffi>=1.1"
+]
+
+# Use setuptools
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "flux-python"
+version = "0.0.0"
+description = "Python bindings for the flux resource manager API"
+readme = "README.md"
+keywords = ["flux", "job manager", "workload manager", "orchestration", "hpc"]
+
+# Corresponds to the `classifiers` argument
+classifiers = [
+    "Intended Audience :: Science/Research",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: GNU Lesser General Public License v3 or later (LGPLv3+)",
+    "Programming Language :: C++",
+    "Programming Language :: Python",
+    "Topic :: Software Development",
+    "Topic :: Scientific/Engineering",
+    "Operating System :: Unix",
+    "Programming Language :: Python :: 3.6",
+    "Programming Language :: Python :: 3.7",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+]
+
+# Corresponds to install_requires
+dependencies = [
+    "cffi>=1.1",
+    "pyyaml"
+]
+
+[project.urls]
+Homepage = "https://github.com/flux-framework/flux-python"
+Repository = "https://github.com/flux-framework/flux-python"
+
+# Corresponds to extras_require
+[project.optional-dependencies]
+dev = [
+    "pyyaml",
+    "jsonschema",
+    "docutils",
+    "black",
+    "IPython"
+]
