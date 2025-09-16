@@ -16,12 +16,12 @@ version = "0.0.0"
 description = "Python bindings for the flux resource manager API"
 readme = "README.md"
 keywords = ["flux", "job manager", "workload manager", "orchestration", "hpc"]
+license.file = "LICENSE"
 
 # Corresponds to the `classifiers` argument
 classifiers = [
     "Intended Audience :: Science/Research",
     "Intended Audience :: Developers",
-    "License :: OSI Approved :: GNU Lesser General Public License v3 or later (LGPLv3+)",
     "Programming Language :: C++",
     "Programming Language :: Python",
     "Topic :: Software Development",

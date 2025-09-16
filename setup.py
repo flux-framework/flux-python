@@ -55,6 +55,8 @@ def is_info_command():
         "--help",
         "--help-commands",
         "--keywords",
+        "--licence",
+        "--license",
         "--long-description",
         "--name",
         "--url",
