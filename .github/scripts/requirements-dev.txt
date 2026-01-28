@@ -4,3 +4,4 @@ jsonschema
 docutils
 black
 IPython
+setuptools
