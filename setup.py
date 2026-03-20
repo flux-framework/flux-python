@@ -83,12 +83,7 @@ options = {
     "hostlist": {
         "header": "include/flux/hostlist.h",
     },
-    # Note that rlist is currently disabled, so this
-    # set of metadata doesn't matter
-    "rlist": {
-        "header": "include/flux/rlist.h",
-        "ignore_headers": ["czmq_containers"],
-    },
+    # rlist no longer requires a library build
     "idset": {
         "header": "include/flux/idset.h",
     },
@@ -101,9 +96,6 @@ options = {
 
 # Global variables for build type, corresponds to
 build_types = {"core", "idset", "security", "hostlist"}
-
-# rlist.h is disabled for now, as it requires the flux-core build
-# build_types = {"core", "idset", "rlist", "security", "hostlist"}
 
 
 @contextmanager
