@@ -5,7 +5,6 @@ PYTHON_VERSION=${1:-3.11}
 sudo apt-get update && sudo apt-get install -y curl
 
 # Install mamba for different python versions
-# Python - instead of a system python we install mamba
 curl -L https://github.com/conda-forge/miniforge/releases/download/24.3.0-0/Mambaforge-24.3.0-0-Linux-x86_64.sh > mambaforge.sh
 
 # Does not build 3.8
@@ -18,6 +17,7 @@ sudo /opt/conda/bin/mamba activate build
 
 # This is intended to run in the container
 echo "Building Python version ${version}"
-/opt/conda/envs/build/bin/python3 -m pip install cffi ply six pyyaml jsonschema
+PIP_INSTALL="/opt/conda/envs/build/bin/python3 -m pip install"
+${PIP_INSTALL} cffi ply six pyyaml jsonschema || ${PIP_INSTALL} cffi ply six pyyaml jsonschema --break-system-packages
 sudo chown -R $(id -u) /opt/conda
-/opt/conda/envs/build/bin/python3 -m pip install --upgrade pkginfo
+${PIP_INSTALL} --upgrade pkginfo || ${PIP_INSTALL} --upgrade pkginfo --break-system-packages
