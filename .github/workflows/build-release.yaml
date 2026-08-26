@@ -8,7 +8,7 @@ on:
         description: 'Pypi version'
       release_version:
         description: 'Version of flux to build'
-        default: "0.68.0"
+        default: "0.88.0"
       rc:
         description: 'Release candidate to build (for wheel)'
         default: "0"
@@ -18,18 +18,37 @@ on:
       repo:
         description: 'Repository to build from'
         default: "https://github.com/flux-framework/flux-core"
+      glibc:
+        description: 'Oldest glibc to support, as a manylinux tag version'
+        default: "2_17"
 
 jobs:
-  build-manual:
+  build:
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
       matrix:
-        python: ["3.8", "3.9", "3.10", "3.11", "3.12", "3.13"]
+        include:
+        # Maybe time to stop supporting...
+        - python: "3.8"
+          base: jammy
+        - python: "3.9"
+          base: jammy
+        - python: "3.10"
+          base: jammy
+        - python: "3.11"
+          base: jammy
+        - python: "3.12"
+          base: jammy
+        - python: "3.13"
+          base: jammy
+          # Update to noble for 3.14
+        - python: "3.14"
+          base: noble
     container:
-      image: fluxrm/testenv:jammy
+      image: fluxrm/testenv:${{ matrix.base }}
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v7
     - name: Setup Python
       env:
         python_version: ${{ matrix.python }}
@@ -38,8 +57,8 @@ jobs:
 
     - name: Build Flux Core Branch
       env:
-        FLUX_RELEASE_VERSION: ${{ inputs.release_version }}
-        FLUX_VERSION: ${{ inputs.version }}
+        FLUX_RELEASE_VERSION: ${{ inputs.release_version || '0.88.0' }}
+        FLUX_VERSION: ${{ inputs.version || inputs.release_version || '0.88.0' }}
       run: /bin/bash .github/scripts/setup.sh
 
     - name: Build Python Bindings
@@ -56,7 +75,7 @@ jobs:
         if [[ "${FLUX_BRANCH}" == "" ]]; then
             FLUX_BRANCH="master"
         fi
-        git clone -b ${FLUX_BRANCH} ${FLUX_REPO} /tmp/flux-core   
+        git clone -b ${FLUX_BRANCH} ${FLUX_REPO} /tmp/flux-core
         mv /tmp/flux-core/src/bindings/python/flux ./flux
         /opt/conda/envs/build/bin/python3 setup.py sdist
         sudo ldconfig
@@ -65,23 +84,33 @@ jobs:
       env:
         build_number: ${{ inputs.rc }}
         python_version: ${{ matrix.python }}
+        MANYLINUX_GLIBC: ${{ inputs.glibc || '2_17' }}
       run: |
         /bin/bash ./docker/build-wheels.sh ${build_number} ${python_version}
         ls ./dist
 
-    - name: Upload distributions
+    - name: Test Install
+      shell: bash
+      run: |
+        PIP_INSTALL="/opt/conda/envs/build/bin/python3 -m pip install"
+        ${PIP_INSTALL} ./dist/*.whl || ${PIP_INSTALL} ./dist/*.whl --break-system-packages
+        cd /tmp
+        /opt/conda/envs/build/bin/python3 -c "import flux, _flux._core, _flux._hostlist, _flux._idset; print(flux.__file__)"
+
+    - name: Upload Artifacts
       if: success()
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v7
       with:
         name: ${{ matrix.python }}
         path: ./dist
 
   upload:
     runs-on: ubuntu-latest
-    needs: [build-manual]
+    needs: [build]
+    if: (github.event_name == 'workflow_dispatch')
     steps:
     - name: Download Artifacts
-      uses: actions/download-artifact@v4
+      uses: actions/download-artifact@v8
       # If name unspecified, all artifacts download for run
 
     - name: Show Files
@@ -97,7 +126,6 @@ jobs:
         ls ./dist
 
     - name: Build and publish
-      if: (github.event_name != 'pull_request')
       env:
         TWINE_USERNAME: ${{ secrets.PYPI_USER }}
         TWINE_PASSWORD: ${{ secrets.PYPI_PASS }}
