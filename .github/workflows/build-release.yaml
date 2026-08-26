@@ -82,11 +82,11 @@ jobs:
 
     - name: Build Python Wheels
       env:
-        build_number: ${{ inputs.rc }}
+        build_number: ${{ inputs.rc || '0' }}
         python_version: ${{ matrix.python }}
         MANYLINUX_GLIBC: ${{ inputs.glibc || '2_17' }}
       run: |
-        /bin/bash ./docker/build-wheels.sh ${build_number} ${python_version}
+        /bin/bash ./docker/build-wheels.sh "${build_number}" "${python_version}"
         ls ./dist
 
     - name: Test Install
@@ -107,7 +107,6 @@ jobs:
   upload:
     runs-on: ubuntu-latest
     needs: [build]
-    if: (github.event_name == 'workflow_dispatch')
     steps:
     - name: Download Artifacts
       uses: actions/download-artifact@v8
@@ -125,13 +124,21 @@ jobs:
         echo "Files to distribute:"
         ls ./dist
 
+    - name: Check distributions
+      run: |
+        python3 -m pip install setuptools wheel twine
+        twine check --strict dist/*
+
+    - name: Test upload
+      if: (github.event_name != 'workflow_dispatch')
+      env:
+        TWINE_USERNAME: __token__
+        TWINE_PASSWORD: ${{ secrets.TEST_PYPI_TOKEN }}
+      run: twine upload --verbose --repository testpypi --skip-existing dist/flux_python*
+      
     - name: Build and publish
+      if: (github.event_name == 'workflow_dispatch')
       env:
         TWINE_USERNAME: ${{ secrets.PYPI_USER }}
         TWINE_PASSWORD: ${{ secrets.PYPI_PASS }}
-      run: |
-        ls dist/
-        python3 -m pip install setuptools wheel
-        python3 -m pip install twine==6.0.1
-        python3 -m pip install --upgrade pkginfo
-        twine upload --skip-existing dist/flux_python*
+      run: twine upload --verbose --skip-existing dist/flux_python*

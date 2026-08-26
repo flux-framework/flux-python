@@ -7,6 +7,7 @@ glibc=${MANYLINUX_GLIBC:-2_17}
 
 # This is intended to run in the container
 echo "Building Python version ${version}"
+echo "Build number ${build_number}"
 
 export PATH=/opt/conda/envs/build/bin:$PATH
 export PYTHONPATH=/opt/conda/envs/build/lib/python${version}/site-packages

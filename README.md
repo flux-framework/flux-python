@@ -2,12 +2,10 @@
 
 > 🐍️ You called me?
 
-Hello! You've found the flux Python bindings, an experiment to build and deploy
-Flux to Pypi without needing to store code alongside Flux. The goal of
-this experiment is to test them separately. This was originally developed
+Hello! You've found the flux Python bindings to build and deploy
+Flux to Pypi without needing to store code alongside Flux. This was originally developed
 at [vsoch/flux-python](https://github.com/vsoch/flux-python) and has 
-been ported here to automate more officially. The following guides might be useful
-to you:
+been ported here to automate more officially. The following guides might be useful to you:
 
  - ⭐️ [Flux Framework Documentation](https://flux-framework.readthedocs.io)
  - ⭐️ [Flux Projects](https://flux-framework.org)
@@ -17,7 +15,7 @@ to you:
 
 ## Helper Install
 
-If you don't want to figure out your flux version and install with pip directory (per instructions in [manual install](#manual-install))
+If you need to install on a system without Flux, please [target a wheel](https://pypi.org/project/flux-python/#files) (`.whl`) file directly that matches the version of Flux you intend to use it with. A vanilla `pip install` will try to compile from source, which requires Flux. If you don't want to figure out your flux version and install with pip directory (per instructions in [manual install](#manual-install))
 we provide a helper script [install-flux-python.sh](script/install-flux-python.sh) that will:
 
 1. Determine that Flux and Python are installed with pip
